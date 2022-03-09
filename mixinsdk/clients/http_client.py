@@ -1,19 +1,23 @@
-from ..api import (AssetApi, ConversationApi, MessageApi, NetworkApi, PinApi,
-                   TransferApi, UserApi)
 from ..common.constants import CONST
 from . import _requests, _sign
-from ._api_interface import ApiInterface
 from .bot_config import BotConfig
 
 
-class HttpClient_WithouAuth:
+class HttpClient_WithoutAuth:
     """HTTP Client without auth token,
     for convenient access to public Mixin APIs.
     """
 
+    class _ApiInterface:
+        def __init__(self, http):
+            # imports Api Classes only when it's required
+            from ..api.network import NetworkApi
+
+            self.network = NetworkApi(http)
+
     def __init__(self, host_uri: str = CONST.API_HOST_DEFAULT):
         self.http = _requests.HttpRequest(host_uri, self._get_auth_token)
-        self.api = ApiInterface(network_api=NetworkApi(self.http))
+        self.api = self._ApiInterface(self.http)
 
     def _get_auth_token(self, *args, **kwargs):  # ignore arguments
         return None
@@ -22,10 +26,16 @@ class HttpClient_WithouAuth:
 class HttpClient_UserAuth:
     """HTTP Client (with user's oauth token)"""
 
+    class _ApiInterface:
+        def __init__(self, http):
+            from ..api.user import UserApi
+
+            self.user = UserApi(http)
+
     def __init__(self, auth_token: str, host_uri: str = CONST.API_HOST_DEFAULT):
         self.auth_token = auth_token
         self.http = _requests.HttpRequest(host_uri, self._get_auth_token)
-        self.api = ApiInterface(user_api=UserApi(self.http))
+        self.api = self._ApiInterface(self.http)
 
     def _get_auth_token(self, *args, **kwargs):  # ignore arguments
         return self.auth_token
@@ -34,17 +44,28 @@ class HttpClient_UserAuth:
 class HttpClient_BotAuth:
     """HTTP Client with bot config"""
 
+    class _ApiInterface:
+        def __init__(self, http, get_encrypted_pin: callable):
+
+            # imports Api Classes only when it's required
+            from ..api.user import UserApi
+            from ..api.message import MessageApi
+            from ..api.asset import AssetApi
+            from ..api.pin import PinApi
+            from ..api.conversation import ConversationApi
+            from ..api.transfer import TransferApi
+
+            self.user = UserApi(http)
+            self.message = MessageApi(http)
+            self.asset = AssetApi(http)
+            self.pin = PinApi(http)
+            self.conversation = ConversationApi(http)
+            self.transfer = TransferApi(http, get_encrypted_pin)
+
     def __init__(self, config: BotConfig, host_uri: str = CONST.API_HOST_DEFAULT):
         self.config = config
         self.http = _requests.HttpRequest(host_uri, self._get_auth_token)
-        self.api = ApiInterface(
-            user_api=UserApi(self.http),
-            message_api=MessageApi(self.http),
-            asset_api=AssetApi(self.http),
-            pin_api=PinApi(self.http),
-            conversation_api=ConversationApi(self.http),
-            transfer_api=TransferApi(self.http, self.get_encrypted_pin),
-        )
+        self.api = self._ApiInterface(self.http, self.get_encrypted_pin)
 
     def _get_auth_token(self, method: str, uri: str, bodystring: str):
         return _sign.sign_authentication_token(
