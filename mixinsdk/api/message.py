@@ -2,9 +2,14 @@ from typing import Dict, List, Union
 
 from ..clients._requests import HttpRequest
 from ..types.message import MESSAGE_CATEGORIES, MessageRequest
-from ..types.message_data_structure import (ButtonGroupStruct, ButtonStruct,
-                                            ContactStruct, PostStruct,
-                                            StickerStruct, TextStruct)
+from ..types.message_data_structure import (
+    ButtonGroupStruct,
+    ButtonStruct,
+    ContactStruct,
+    PostStruct,
+    StickerStruct,
+    TextStruct,
+)
 
 
 class MessageApi:

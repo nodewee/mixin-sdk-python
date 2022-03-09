@@ -1,6 +1,5 @@
 from mixinsdk.clients.bot_config import BotConfig
-from mixinsdk.clients.http_client import (HttpClient_BotAuth,
-                                          HttpClient_UserAuth)
+from mixinsdk.clients.http_client import HttpClient_BotAuth, HttpClient_UserAuth
 
 from ._example_vars import BOT_CONFIG_FILE, MY_USER_ID, USER_AUTH_TOKEN
 
@@ -31,8 +30,8 @@ def test_read_user():
 
 # Read multiple users
 def test_read_users():
-    uids = [MY_USER_ID, botclient.config.client_id]
-    r = botclient.api.user.get_users(uids)
+    uid_list = [MY_USER_ID, botclient.config.client_id]
+    r = botclient.api.user.get_users(uid_list)
     print(r)
     assert r["data"]
 

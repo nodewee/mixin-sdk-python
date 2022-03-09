@@ -26,8 +26,8 @@ def parse_rfc3339_to_datetime(s: str):
     [datestr, timestr] = s.split("T")
     [year, month, day] = datestr.split("-")
     [hour, minute, second] = timestr.split(":")
-    [second, nanosec] = second.split(".")
-    microsec = int(nanosec.rstrip("Z")[:6])
+    [second, nano_sec] = second.split(".")
+    microsec = int(nano_sec.rstrip("Z")[:6])
 
     return datetime.datetime(
         int(year),

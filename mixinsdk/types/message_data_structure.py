@@ -122,4 +122,5 @@ class ImageStruct(_MessageDataStructure):
     def from_dict(cls, data: Dict[str, Any]) -> "ImageStruct":
         return dacite.from_dict(cls, data)
 
+
 # TODO more structures

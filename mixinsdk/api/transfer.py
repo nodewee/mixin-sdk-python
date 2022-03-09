@@ -117,7 +117,7 @@ class TransferApi:
         return self._http.post("/transactions", body)
 
     # TODO: offset, support for more types: datetime, unix timestamp
-    def get_snapshots_lsit(
+    def get_snapshots_list(
         self,
         offset: str,
         limit: int,
@@ -135,7 +135,7 @@ class TransferApi:
             - offset: *required*, pagination start time,
                 e.g. `2020-12-12T12:12:12.999999999Z`.
             - limit: *required*, the number of results to return,
-                pagination limit, maximamlly 500.
+                pagination limit, maximally 500.
             - order: Order snapshots e.g. `ASC or DESC`.
             - asset_id: Optional, get transfers by asset.
             - opponent_id: Optional, get transfers by opponent (user or bot).
@@ -153,6 +153,6 @@ class TransferApi:
 
         return self._http.get("/snapshots", params)
 
-    def get_sanpshot(self, snapshot_id: str):
+    def get_snapshot(self, snapshot_id: str):
         """Get the snapshot of a user by snapshot id"""
         return self._http.get(f"/snapshots/{snapshot_id}")

@@ -40,10 +40,10 @@ class NetworkApi:
             - query: *required*, symbol (such as "BTC") or name (such as "Bitcoin")
             - kind: optional, "ALL", "NORMAL", "BARREN", "ALL" by default
         """
-        params = {"query": query}
+        params = {}
         if kind:
             params["kind"] = kind
-        return self._http.get("/network/assets/search", params)
+        return self._http.get(f"/network/assets/search/{query}", params)
 
     # TODO: offset support more types, and convert with utc time
     def get_snapshots_list(
@@ -78,7 +78,7 @@ class NetworkApi:
         """
         Read snapshot details by id.
         No permission needed. If given permission "SNAPSHOT:READ",
-        detials will include the private fields like `user_id`,
+        details will include the private fields like `user_id`,
         `opponent_id`, `trace_id` and `data`.
         """
         return self._http.get("/network/snapshots/" + snapshot_id)

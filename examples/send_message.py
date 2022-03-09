@@ -1,12 +1,19 @@
 from mixinsdk.clients.http_client import BotConfig, HttpClient_BotAuth
 from mixinsdk.types.message import MESSAGE_CATEGORIES, MessageRequest
-from mixinsdk.types.message_data_structure import (ButtonStruct, StickerStruct,
-                                                   TextStruct)
-from mixinsdk.types.messenger_schema import (InvokePaymentStruct,
-                                             SharingTextStruct)
+from mixinsdk.types.message_data_structure import (
+    ButtonStruct,
+    StickerStruct,
+    TextStruct,
+)
+from mixinsdk.types.messenger_schema import InvokePaymentStruct, SharingTextStruct
 
-from ._example_vars import (BOT_CONFIG_FILE, CNB_ASSET_ID, MY_GROUP_ID,
-                            MY_USER_ID, STICKER_ID)
+from ._example_vars import (
+    BOT_CONFIG_FILE,
+    CNB_ASSET_ID,
+    MY_GROUP_ID,
+    MY_USER_ID,
+    STICKER_ID,
+)
 
 cfg = BotConfig.from_file(BOT_CONFIG_FILE)
 bot = HttpClient_BotAuth(cfg)

@@ -40,7 +40,7 @@ class PinApi:
         the user of the number of errors within 24 hours.
 
         params:
-        - limit, Pagination limit, maximamlly 100.
+        - limit, Pagination limit, maximally 100.
         - offset, Pagination start time, e.g. `2020-12-12T12:12:12.999999999Z`
         """
         # - category, Log type, please set to `PIN_INCORRECT`

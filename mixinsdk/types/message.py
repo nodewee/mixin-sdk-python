@@ -6,8 +6,14 @@ from typing import Any, Dict
 import dacite
 
 from ..common.utils import base64_decode, parse_rfc3339_to_datetime
-from .message_data_structure import (ButtonStruct, ContactStruct, ImageStruct,
-                                     PostStruct, StickerStruct, TextStruct)
+from .message_data_structure import (
+    ButtonStruct,
+    ContactStruct,
+    ImageStruct,
+    PostStruct,
+    StickerStruct,
+    TextStruct,
+)
 
 
 @dataclass(frozen=True)

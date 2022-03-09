@@ -1,9 +1,9 @@
-from mixinsdk.clients.http_client import HttpClient_WithouAuth
+from mixinsdk.clients.http_client import HttpClient_WithoutAuth
 
-client = HttpClient_WithouAuth()
+client = HttpClient_WithoutAuth()
 
 
-def test_get_sanpshots_lsit():
+def test_get_snapshots_list():
     r = client.api.network.get_snapshots_list()
     print(r)
     assert r["data"] is not None

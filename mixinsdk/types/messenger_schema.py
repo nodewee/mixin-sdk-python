@@ -30,7 +30,7 @@ class SharingTextStruct:
 
 
 @dataclass
-class SharingImageSturct:
+class SharingImageStruct:
     image_url: str
     conversation_id: str = None
 
@@ -40,7 +40,7 @@ class SharingImageSturct:
         return generate_sharing_uri("image", data, self.conversation_id)
 
 
-# TODO: more sharing shcema types
+# TODO: more sharing schema types
 
 
 @dataclass
@@ -72,7 +72,7 @@ class InvokePaymentStruct:
         return uri
 
 
-# TODO: more payment shcema types
+# TODO: more payment schema types
 
 
-# TODO: other shcema types
+# TODO: other schema types

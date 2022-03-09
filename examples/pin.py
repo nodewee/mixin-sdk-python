@@ -1,6 +1,5 @@
 from mixinsdk.clients.bot_config import BotConfig
-from mixinsdk.clients.http_client import (HttpClient_BotAuth,
-                                          HttpClient_UserAuth)
+from mixinsdk.clients.http_client import HttpClient_BotAuth, HttpClient_UserAuth
 
 from ._example_vars import BOT_CONFIG_FILE, USER_AUTH_TOKEN
 

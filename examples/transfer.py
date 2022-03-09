@@ -13,8 +13,8 @@ def test_send_transfer():
     assert r["data"] is not None
 
 
-def test_get_sanpshots():
+def test_get_snapshots():
     offset = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    r = client.api.transfer.get_snapshots_lsit(offset, 3)
+    r = client.api.transfer.get_snapshots_list(offset, 3)
     print(r)
     assert r["data"] is not None

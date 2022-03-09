@@ -1,8 +1,7 @@
 import asyncio
 
 from mixinsdk.clients.blaze_client import BlazeClient, BotConfig
-from mixinsdk.types.message import (MESSAGE_CATEGORIES, MessageRequest,
-                                    MessageView)
+from mixinsdk.types.message import MESSAGE_CATEGORIES, MessageRequest, MessageView
 from mixinsdk.types.message_data_structure import ContactStruct, TextStruct
 
 from ._example_vars import MY_USER_ID

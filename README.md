@@ -11,12 +11,14 @@ Based on:
 - <https://github.com/includeleec/mixin-python3-sdk>
 - <https://github.com/learnforpractice/mixin-python>
 
+**It is still in development, please do not use it in production environment.**
+
 Runtime support: Python 3.9
 
 ## Progress
 
 - [x] Support for Ed25519 and RS512 for signature and encryption
-- [x] Support for client initialize from keystore, user OAuth token and withou auth
+- [x] Support for client initialize from keystore, user OAuth token and without auth
 - [x] HTTP Client
 - [x] Blaze(Websocket) Client
 - [x] User API
@@ -56,6 +58,10 @@ python3.9 -m venv env
 `python3.9 -m pip install -r requirements.txt`
 
 4. Than see "examples" folder, and run the example.
+
+## Contributing
+
+Thanks for taking the time to contribute! Welcome to pull requests and open issues to improve the code and the documentation. The project need your help.✨
 
 ## References
 
