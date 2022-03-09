@@ -6,11 +6,11 @@ import httpx
 
 
 class HttpRequest:
-    def __init__(self, host_uri, get_auth_token: callable):
+    def __init__(self, api_base, get_auth_token: callable):
         self.get_auth_token = get_auth_token
         # get_auth_token() parameters: method: str, uri: str, bodystring: str
 
-        self.host_uri = host_uri
+        self.api_base = api_base
         self.session = httpx.Client()
 
     def get(self, path, query_params: dict = None, request_id=None):
@@ -18,7 +18,7 @@ class HttpRequest:
             params_string = "&".join(f"{k}={v}" for k, v in query_params.items())
             path = f"{path}?{params_string}"
 
-        url = self.host_uri + path
+        url = self.api_base + path
         headers = {"Content-Type": "application/json"}
 
         auth_token = self.get_auth_token("GET", path, "")
@@ -40,7 +40,7 @@ class HttpRequest:
             params_string = "&".join(f"{k}={v}" for k, v in query_params.items())
             path = f"{path}?{params_string}"
 
-        url = self.host_uri + path
+        url = self.api_base + path
         headers = {"Content-Type": "application/json"}
         bodystring = json.dumps(body)
         auth_token = self.get_auth_token("POST", path, bodystring)

@@ -4,7 +4,7 @@ import uuid
 
 import websockets
 
-from ..common.constants import CONST
+from ..common.constants import API_BASE_URLS
 from ._sign import sign_authentication_token
 from .bot_config import BotConfig
 
@@ -16,9 +16,9 @@ class BlazeClient:
         self,
         config: BotConfig,
         on_message: callable,
-        host_uri: str = CONST.BLAZE_HOST_DEFAULT,
+        api_base: str = API_BASE_URLS.BLAZE_DEFAULT,
     ):
-        self.host_uri = host_uri
+        self.api_base = api_base
         self.config = config
         self.on_message = on_message
         self.ws = None
@@ -41,9 +41,9 @@ class BlazeClient:
         token = self._get_auth_token("GET", "/", "")
         headers = {"Authorization": "Bearer " + token}
         self.ws = await websockets.connect(
-            self.host_uri, subprotocols=["Mixin-Blaze-1"], extra_headers=headers
+            self.api_base, subprotocols=["Mixin-Blaze-1"], extra_headers=headers
         )
-        print(f"Blaze client connected. (to {self.host_uri}")
+        print(f"Blaze client connected. (to {self.api_base}")
 
     async def run(self):
         """

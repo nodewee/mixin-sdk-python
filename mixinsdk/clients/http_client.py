@@ -1,4 +1,4 @@
-from ..common.constants import CONST
+from ..common.constants import API_BASE_URLS
 from . import _requests, _sign
 from .bot_config import BotConfig
 
@@ -15,8 +15,8 @@ class HttpClient_WithoutAuth:
 
             self.network = NetworkApi(http)
 
-    def __init__(self, host_uri: str = CONST.API_HOST_DEFAULT):
-        self.http = _requests.HttpRequest(host_uri, self._get_auth_token)
+    def __init__(self, api_base: str = API_BASE_URLS.HTTP_DEFAULT):
+        self.http = _requests.HttpRequest(api_base, self._get_auth_token)
         self.api = self._ApiInterface(self.http)
 
     def _get_auth_token(self, *args, **kwargs):  # ignore arguments
@@ -32,9 +32,9 @@ class HttpClient_UserAuth:
 
             self.user = UserApi(http)
 
-    def __init__(self, auth_token: str, host_uri: str = CONST.API_HOST_DEFAULT):
+    def __init__(self, auth_token: str, api_base: str = API_BASE_URLS.HTTP_DEFAULT):
         self.auth_token = auth_token
-        self.http = _requests.HttpRequest(host_uri, self._get_auth_token)
+        self.http = _requests.HttpRequest(api_base, self._get_auth_token)
         self.api = self._ApiInterface(self.http)
 
     def _get_auth_token(self, *args, **kwargs):  # ignore arguments
@@ -62,9 +62,9 @@ class HttpClient_BotAuth:
             self.conversation = ConversationApi(http)
             self.transfer = TransferApi(http, get_encrypted_pin)
 
-    def __init__(self, config: BotConfig, host_uri: str = CONST.API_HOST_DEFAULT):
+    def __init__(self, config: BotConfig, api_base: str = API_BASE_URLS.HTTP_DEFAULT):
         self.config = config
-        self.http = _requests.HttpRequest(host_uri, self._get_auth_token)
+        self.http = _requests.HttpRequest(api_base, self._get_auth_token)
         self.api = self._ApiInterface(self.http, self.get_encrypted_pin)
 
     def _get_auth_token(self, method: str, uri: str, bodystring: str):
