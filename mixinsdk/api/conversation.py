@@ -1,7 +1,7 @@
-import hashlib
 import uuid
 
 from ..clients._requests import HttpRequest
+from ..common.utils import get_conversation_id_of_two_users
 
 
 class ConversationApi:
@@ -10,20 +10,11 @@ class ConversationApi:
 
     @staticmethod
     def get_unique_id(user_id, recipient_id):
-        """get conversation id of single chat between two users, such as bot and user"""
-        min_id = user_id
-        max_id = recipient_id
-        if min_id > max_id:
-            min_id, max_id = max_id, min_id
-
-        md5 = hashlib.md5()
-        md5.update(min_id.encode())
-        md5.update(max_id.encode())
-        sum = list(md5.digest())
-
-        sum[6] = (sum[6] & 0x0F) | 0x30
-        sum[8] = (sum[8] & 0x3F) | 0x80
-        return str(uuid.UUID(bytes=bytes(sum)))
+        """
+        Get conversation id of single chat between two users, such as bot and user.
+            Same as `common.utils.get_conversation_id_of_two_users`
+        """
+        return get_conversation_id_of_two_users(user_id, recipient_id)
 
     @staticmethod
     def generate_random_id():

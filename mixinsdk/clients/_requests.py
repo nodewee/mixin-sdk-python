@@ -1,17 +1,21 @@
 import json
 import uuid
 from typing import Union
-
-import httpx
+from ..types.errors import RequestError
 
 
 class HttpRequest:
-    def __init__(self, api_base, get_auth_token: callable):
+    def __init__(self, api_base, get_auth_token: callable, _custom_http_session=None):
         self.get_auth_token = get_auth_token
         # get_auth_token() parameters: method: str, uri: str, bodystring: str
 
         self.api_base = api_base
-        self.session = httpx.Client()
+        if _custom_http_session:
+            self.session = _custom_http_session
+        else:
+            import httpx
+
+            self.session = httpx.Client()
 
     def get(self, path, query_params: dict = None, request_id=None):
         if query_params:
@@ -29,9 +33,22 @@ class HttpRequest:
         headers["X-Request-Id"] = request_id
 
         r = self.session.get(url, headers=headers)
-        r = r.json()
 
-        return r
+        try:
+            body_json = r.json()
+        except Exception:
+            body_json = {}
+
+        if r.status_code != 200:
+            raise RequestError(
+                r.status_code,
+                r.reason_phrase + " " + json.dumps(body_json.get("error", "")),
+            )
+
+        if "error" in body_json:
+            raise RequestError(r.status_code, json.dumps(body_json.get("error", "")))
+
+        return body_json
 
     def post(
         self, path, body: Union[dict, list], query_params: dict = None, request_id=None
@@ -50,12 +67,27 @@ class HttpRequest:
         request_id = request_id if request_id else str(uuid.uuid4())
         headers["X-Request-Id"] = request_id
 
-        r = self.session.post(url, data=bodystring, headers=headers)
-        r = r.json()
+        r = self.session.post(url, headers=headers, data=bodystring)
 
-        # error response JSON have the key "error",
-        # else have any data or empty JSON on success.
-        """ example of error response:
+        try:
+            body_json = r.json()
+        except Exception:
+            body_json = {}
+
+        if r.status_code != 200:
+            raise RequestError(
+                r.status_code,
+                r.reason_phrase + " " + json.dumps(body_json.get("error", "")),
+            )
+
+        if "error" in body_json:
+            raise RequestError(r.status_code, json.dumps(body_json.get("error", "")))
+
+        """
+        error response JSON have the key "error",
+        else have any data or empty JSON on success.
+        #
+        example of error response:
         {
             "error": {
                 "status": 202,
@@ -65,7 +97,4 @@ class HttpRequest:
         }
         """
 
-        if "error" in r:
-            raise Exception(r["error"])
-
-        return r
+        return body_json
