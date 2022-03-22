@@ -18,7 +18,7 @@ class MessageApi:
 
     def send_messages(self, messages: Union[List[dict], dict]):
         """
-        messages: single message object or list of message objects.
+        messages: single message object(dict) or list of message objects.
             if send multiple messages, every message must contain recipient_id
         A maximum of 100 messages can be sent in batch each time, and the message body cannot exceed 128Kb.
         """

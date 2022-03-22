@@ -1,16 +1,6 @@
-import base64
 import datetime
-from typing import Union
-
-
-def base64_encode(s: bytes):
-    """Use url-safe-alphabet uniformly"""
-    return base64.urlsafe_b64encode(s)
-
-
-def base64_decode(s: Union[bytes, str]):
-    """Use url-safe-alphabet uniformly"""
-    return base64.urlsafe_b64decode(s)
+import hashlib
+import uuid
 
 
 def base64_pad_equal_sign(s: str):
@@ -21,7 +11,8 @@ def base64_pad_equal_sign(s: str):
 
 def parse_rfc3339_to_datetime(s: str):
     """
-    -s, RFC3339Nano format, e.g. `2020-12-12T12:12:12.999999999Z`
+    Params:
+    - s: RFC3339Nano format, e.g. `2020-12-12T12:12:12.999999999Z`
     """
     [datestr, timestr] = s.split("T")
     [year, month, day] = datestr.split("-")
@@ -38,3 +29,20 @@ def parse_rfc3339_to_datetime(s: str):
         int(second),
         int(microsec),
     )
+
+
+def get_conversation_id_of_two_users(a_user_id, b_user_id):
+    """Get conversation id of single chat between two users, such as bot and user."""
+    min_id = a_user_id
+    max_id = b_user_id
+    if min_id > max_id:
+        min_id, max_id = max_id, min_id
+
+    md5 = hashlib.md5()
+    md5.update(min_id.encode())
+    md5.update(max_id.encode())
+    sum = list(md5.digest())
+
+    sum[6] = (sum[6] & 0x0F) | 0x30
+    sum[8] = (sum[8] & 0x3F) | 0x80
+    return str(uuid.UUID(bytes=bytes(sum)))

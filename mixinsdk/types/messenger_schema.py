@@ -5,7 +5,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Union
 
-from ..common.utils import base64_encode
+from base64 import b64encode
 
 
 def generate_sharing_uri(category: str, data: str, conversation_id: str = None) -> str:
@@ -25,7 +25,7 @@ class SharingTextStruct:
     conversation_id: str = None
 
     def to_uri(self):
-        data = base64_encode(self.text.encode("utf-8")).decode("utf-8")
+        data = b64encode(self.text.encode("utf-8")).decode("utf-8")
         return generate_sharing_uri("text", data, self.conversation_id)
 
 
@@ -36,7 +36,7 @@ class SharingImageStruct:
 
     def to_uri(self):
         payload = {"url": self.image_url}
-        data = base64_encode(json.dumps(payload).encode("utf-8")).decode("utf-8")
+        data = b64encode(json.dumps(payload).encode("utf-8")).decode("utf-8")
         return generate_sharing_uri("image", data, self.conversation_id)
 
 
@@ -76,3 +76,11 @@ class InvokePaymentStruct:
 
 
 # TODO: other schema types
+
+
+__all__ = [
+    "generate_sharing_uri",
+    "SharingTextStruct",
+    "SharingImageStruct",
+    "InvokePaymentStruct",
+]

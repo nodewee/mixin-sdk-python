@@ -48,12 +48,12 @@ class HttpClient_BotAuth:
         def __init__(self, http, get_encrypted_pin: callable):
 
             # imports Api Classes only when it's required
-            from ..api.user import UserApi
-            from ..api.message import MessageApi
             from ..api.asset import AssetApi
-            from ..api.pin import PinApi
             from ..api.conversation import ConversationApi
+            from ..api.message import MessageApi
+            from ..api.pin import PinApi
             from ..api.transfer import TransferApi
+            from ..api.user import UserApi
 
             self.user = UserApi(http)
             self.message = MessageApi(http)

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Union
 
 import dacite
 
-from ..common.utils import base64_encode
+from base64 import b64encode
 
 
 class TextStruct:
@@ -12,7 +12,7 @@ class TextStruct:
         self.text = text
 
     def to_base64(self) -> str:
-        return base64_encode(self.text.encode("utf-8")).decode("utf-8")
+        return b64encode(self.text.encode("utf-8")).decode("utf-8")
 
 
 class PostStruct(TextStruct):
@@ -22,13 +22,18 @@ class PostStruct(TextStruct):
 @dataclass
 class _MessageDataStructure:
     def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+        d = {}
+        for k, v in asdict(self).items():
+            # removed empty items
+            if v is not None:
+                d[k] = v
+        return d
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict())
 
     def to_base64(self) -> str:
-        return base64_encode(self.to_json().encode("utf-8")).decode("utf-8")
+        return b64encode(self.to_json().encode("utf-8")).decode("utf-8")
 
 
 @dataclass
@@ -87,7 +92,7 @@ class ButtonGroupStruct:
         return json.dumps(lst)
 
     def to_base64(self) -> str:
-        return base64_encode(self.to_json().encode("utf-8")).decode("utf-8")
+        return b64encode(self.to_json().encode("utf-8")).decode("utf-8")
 
     @classmethod
     def from_json(cls, data: str) -> "ButtonGroupStruct":
@@ -124,3 +129,14 @@ class ImageStruct(_MessageDataStructure):
 
 
 # TODO more structures
+
+
+__all__ = [
+    "TextStruct",
+    "PostStruct",
+    "StickerStruct",
+    "ContactStruct",
+    "ButtonStruct",
+    "ButtonGroupStruct",
+    "ImageStruct",
+]

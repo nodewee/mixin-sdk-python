@@ -11,7 +11,7 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.asymmetric import padding as _padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-from ..common.utils import base64_decode, base64_encode
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 
 def sign_authentication_token(
@@ -55,7 +55,7 @@ def encrypt_pin(
     pin, pin_token, private_key, key_algorithm, session_id, iter_string: str = None
 ):
     """Support RS512 and Ed25519 algorithm"""
-    pin_token_bytes = base64_decode(pin_token)
+    pin_token_bytes = urlsafe_b64decode(pin_token)
 
     # Get pin key
     if key_algorithm == "RS512":
@@ -105,5 +105,5 @@ def encrypt_pin(
     ciphertext = encryptor.update(be_encrypt)  # do not: + encryptor.finalize()
     #
     encrypted_pin = iv + ciphertext
-    encrypted_pin = base64_encode(encrypted_pin).decode()
+    encrypted_pin = urlsafe_b64encode(encrypted_pin).decode()
     return encrypted_pin

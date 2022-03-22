@@ -83,7 +83,7 @@ class NetworkApi:
         """
         return self._http.get("/network/snapshots/" + snapshot_id)
 
-    def get_historical_price(self, asset_id: str, offset):
+    def get_historical_price(self, asset_id: str, offset=None):
         """
         Get the historical price of a given asset.
         No permission needed.
@@ -93,7 +93,7 @@ class NetworkApi:
         - offset, optional, specify query time in RFC3339Nano format,
             e.g. `2020-12-12T12:12:12.999999999Z`
         """
-        params = {"asset_id": asset_id}
+        params = {"asset": asset_id}
         if offset:
             params["offset"] = offset
         return self._http.get("/network/ticker", params)

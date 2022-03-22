@@ -1,6 +1,6 @@
 import json
-
-from ..common.utils import base64_decode, base64_pad_equal_sign
+from base64 import urlsafe_b64decode
+from ..common.utils import base64_pad_equal_sign
 
 
 class BotConfig:
@@ -35,7 +35,7 @@ class BotConfig:
         else:
             self.key_algorithm = "Ed25519"
             key = base64_pad_equal_sign(self.private_key)
-            self.private_key = base64_decode(key.encode())
+            self.private_key = urlsafe_b64decode(key.encode())
 
     @classmethod
     def from_payload(cls, payload: str) -> "BotConfig":

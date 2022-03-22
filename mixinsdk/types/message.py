@@ -1,18 +1,23 @@
 import json
 import uuid
+
 from dataclasses import asdict, dataclass
 from typing import Any, Dict
 
 import dacite
 
-from ..common.utils import base64_decode, parse_rfc3339_to_datetime
+from base64 import b64encode
+
+from ..common.utils import parse_rfc3339_to_datetime
+
 from .message_data_structure import (
-    ButtonStruct,
-    ContactStruct,
-    ImageStruct,
+    TextStruct,
     PostStruct,
     StickerStruct,
-    TextStruct,
+    ContactStruct,
+    ImageStruct,
+    ButtonStruct,
+    ButtonGroupStruct,
 )
 
 
@@ -49,7 +54,7 @@ class MessageRequest:
     """
     - conversation_id, *required*
     - category, *required*
-    - data, *required*, Base64 encoded string
+    - data, *required*, Base64 encoded string of content payload
     - recipient_id, optional when send single message,
         *required* when send list of messages
     - message_id, optional, if not set, will be generated randomly
@@ -116,7 +121,7 @@ def parse_data(data: str, category: str) -> object:
 
     Returns: (data_decoded, data_struct)
     """
-    d = base64_decode(data).decode("utf-8")
+    d = b64encode(data).decode("utf-8")
     data_decoded = d
     if category == MESSAGE_CATEGORIES.TEXT:
         return data_decoded, TextStruct(d)
@@ -142,3 +147,6 @@ def parse_data(data: str, category: str) -> object:
             buttons.append(ButtonStruct(**i))
 
     return data_decoded, f"Unknown message category: {category}"
+
+
+__all__ = ["MESSAGE_CATEGORIES", "MessageRequest", "MessageView", "parse_data"]
