@@ -1,6 +1,7 @@
 import json
 from base64 import urlsafe_b64decode
-from ..common.utils import base64_pad_equal_sign
+
+from ..utils import base64_pad_equal_sign
 
 
 class BotConfig:
@@ -18,6 +19,7 @@ class BotConfig:
         private_key,
         mixin_id=None,
         client_secret=None,
+        name=None,
     ):
         """You can get bot config value from https://developers.mixin.one/dashboard"""
 
@@ -28,6 +30,7 @@ class BotConfig:
         self.private_key = private_key
         self.mixin_id = mixin_id
         self.client_secret = client_secret
+        self.name = name
         #
         self.key_algorithm = ""  # Ed25519 or RS512 (EdDSA:Ed25519, RSA:RS512)
         if "RSA PRIVATE KEY" in self.private_key:
@@ -49,6 +52,7 @@ class BotConfig:
             "private_key": "",
             "mixin_id": "",
             "client_secret": ""
+            "name": ""
         }
         """
 
@@ -61,6 +65,7 @@ class BotConfig:
             d["private_key"],
             d.get("mixin_id"),
             d.get("client_secret"),
+            d.get("name"),
         )
         return c
 

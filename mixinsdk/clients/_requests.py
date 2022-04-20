@@ -1,6 +1,7 @@
 import json
 import uuid
 from typing import Union
+
 from ..types.errors import RequestError
 
 
@@ -40,13 +41,16 @@ class HttpRequest:
             body_json = {}
 
         if r.status_code != 200:
-            raise RequestError(
-                r.status_code,
-                r.reason_phrase + " " + json.dumps(body_json.get("error", "")),
-            )
+            error = body_json.get("error", {})
+            status_code = error.get("code", r.status_code)
+            message = error.get("description", r.reason_phrase)
+            raise RequestError(status_code, message)
 
         if "error" in body_json:
-            raise RequestError(r.status_code, json.dumps(body_json.get("error", "")))
+            error = body_json.get("error", {})
+            status_code = error.get("code", r.status_code)
+            message = error.get("description", r.reason_phrase)
+            raise RequestError(status_code, message)
 
         return body_json
 
@@ -75,13 +79,18 @@ class HttpRequest:
             body_json = {}
 
         if r.status_code != 200:
-            raise RequestError(
-                r.status_code,
-                r.reason_phrase + " " + json.dumps(body_json.get("error", "")),
-            )
+            error = body_json.get("error", {})
+            status_code = error.get("code", r.status_code)
+            message = error.get("description", r.reason_phrase)
+            raise RequestError(status_code, message)
 
         if "error" in body_json:
-            raise RequestError(r.status_code, json.dumps(body_json.get("error", "")))
+            error = body_json.get("error", {})
+            status_code = error.get("code", r.status_code)
+            message = error.get("description", r.reason_phrase)
+            raise RequestError(status_code, message)
+
+        return body_json
 
         """
         error response JSON have the key "error",

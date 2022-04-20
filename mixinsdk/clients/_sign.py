@@ -3,6 +3,7 @@ import hashlib
 import os
 import time
 import uuid
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 import jwt
 import nacl.bindings
@@ -10,8 +11,6 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.asymmetric import padding as _padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-
-from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 
 def sign_authentication_token(
