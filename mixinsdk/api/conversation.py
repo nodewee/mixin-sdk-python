@@ -1,7 +1,7 @@
 import uuid
 
 from ..clients._requests import HttpRequest
-from ..common.utils import get_conversation_id_of_two_users
+from ..utils import get_conversation_id_of_two_users
 
 
 class ConversationApi:

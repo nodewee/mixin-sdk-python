@@ -46,3 +46,16 @@ def get_conversation_id_of_two_users(a_user_id, b_user_id):
     sum[6] = (sum[6] & 0x0F) | 0x30
     sum[8] = (sum[8] & 0x3F) | 0x80
     return str(uuid.UUID(bytes=bytes(sum)))
+
+
+def is_group_conversation(conversation_id, from_user_id, bot_client_id):
+    """
+    Check the conversation is a conversation between bot and user,
+    or is a group conversation, by compare conversation_id.
+    """
+    u2u_conv_id = get_conversation_id_of_two_users(from_user_id, bot_client_id)
+    if conversation_id == u2u_conv_id:  # single chat
+        return False
+    return True
+
+    # or by request mixin api

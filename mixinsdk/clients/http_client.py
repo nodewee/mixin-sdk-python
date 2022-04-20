@@ -1,4 +1,4 @@
-from ..common.constants import API_BASE_URLS
+from ..constants import API_BASE_URLS
 from . import _requests, _sign
 from .bot_config import BotConfig
 

@@ -1,24 +1,13 @@
+import base64
+import decimal
 import json
 import uuid
-
 from dataclasses import asdict, dataclass
 from typing import Any, Dict
 
 import dacite
 
-from base64 import b64encode
-
-from ..common.utils import parse_rfc3339_to_datetime
-
-from .message_data_structure import (
-    TextStruct,
-    PostStruct,
-    StickerStruct,
-    ContactStruct,
-    ImageStruct,
-    ButtonStruct,
-    ButtonGroupStruct,
-)
+from ..utils import parse_rfc3339_to_datetime
 
 
 @dataclass(frozen=True)
@@ -49,40 +38,39 @@ class _MessageCategory:
 MESSAGE_CATEGORIES = _MessageCategory()
 
 
-@dataclass
-class MessageRequest:
+def pack_message(
+    conversation_id: str,
+    category: str,
+    data: str,
+    message_id: str = None,
+    recipient_id: str = None,
+    representative_id: str = None,
+    quote_message_id: str = None,
+):
     """
     - conversation_id, *required*
     - category, *required*
-    - data, *required*, Base64 encoded string of content payload
+    - data, *required*, base64 encoded string of content payload
     - recipient_id, optional when send single message,
         *required* when send list of messages
     - message_id, optional, if not set, will be generated randomly
     """
 
-    conversation_id: str
-    category: str
-    data: str
-    recipient_id: str = None
-    message_id: str = None
-    representative_id: str = None
-    quote_message_id: str = None
+    message_id = message_id if message_id else str(uuid.uuid4())
+    pld = {
+        "conversation_id": conversation_id,
+        "category": category,
+        "data": data,
+        "message_id": message_id,
+    }
+    if recipient_id:
+        pld["recipient_id"] = recipient_id
+    if representative_id:
+        pld["representative_id"] = representative_id
+    if quote_message_id:
+        pld["quote_message_id"] = quote_message_id
 
-    def __post_init__(self):
-        if not self.message_id:
-            self.message_id = str(uuid.uuid4())
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "MessageRequest":
-        return dacite.from_dict(cls, data)
-
-    def to_dict(self) -> Dict[str, Any]:
-        d = {}
-        for k, v in asdict(self).items():
-            # removed empty items
-            if v is not None:
-                d[k] = v
-        return d
+    return pld
 
 
 @dataclass
@@ -103,7 +91,7 @@ class MessageView:
     updated_at: str
 
     def __post_init__(self):
-        self.data_decoded, self.data_struct = parse_data(self.data, self.category)
+        self.data_decoded = parse_data(self.data, self.category)
         self.created_at = parse_rfc3339_to_datetime(self.created_at)
         self.updated_at = parse_rfc3339_to_datetime(self.updated_at)
 
@@ -115,38 +103,20 @@ class MessageView:
         return asdict(self)
 
 
-def parse_data(data: str, category: str) -> object:
+def parse_data(data_str: str, category: str):
     """
-    parse message data (Base64 encoded string) to specific message data structure object
+    parse message data (Base64 encoded string) to str or dict
 
-    Returns: (data_decoded, data_struct)
+    Returns: parsed_data
     """
-    d = b64encode(data).decode("utf-8")
-    data_decoded = d
-    if category == MESSAGE_CATEGORIES.TEXT:
-        return data_decoded, TextStruct(d)
-    if category == MESSAGE_CATEGORIES.POST:
-        return data_decoded, PostStruct(d)
+    if not data_str:
+        return ""
+
+    d = base64.b64decode(data_str).decode()
+    if category in [MESSAGE_CATEGORIES.TEXT, MESSAGE_CATEGORIES.POST]:
+        return d
 
     try:
-        d = json.loads(d)
-        print(f"msg data struct: {d}")
+        return json.loads(d)
     except json.JSONDecodeError:
         print(f"Failed to json decode data: {d}")
-    data_decoded = d
-
-    if category == MESSAGE_CATEGORIES.STICKER:
-        return data_decoded, StickerStruct(**d)
-    if category == MESSAGE_CATEGORIES.CONTACT:
-        return data_decoded, ContactStruct(**d)
-    if category == MESSAGE_CATEGORIES.IMAGE:
-        return data_decoded, ImageStruct(**d)
-    if category == MESSAGE_CATEGORIES.BUTTON_GROUP:
-        buttons = []
-        for i in d:
-            buttons.append(ButtonStruct(**i))
-
-    return data_decoded, f"Unknown message category: {category}"
-
-
-__all__ = ["MESSAGE_CATEGORIES", "MessageRequest", "MessageView", "parse_data"]
