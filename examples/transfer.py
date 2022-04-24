@@ -18,3 +18,4 @@ def test_get_snapshots():
     r = client.api.transfer.get_snapshots_list(offset, 3)
     print(r)
     assert r["data"] is not None
+

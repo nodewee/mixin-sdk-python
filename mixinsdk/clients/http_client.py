@@ -1,6 +1,7 @@
 from ..constants import API_BASE_URLS
 from . import _requests, _sign
 from .bot_config import BotConfig
+from ..utils import get_conversation_id_of_two_users
 
 
 class HttpClient_WithoutAuth:
@@ -62,6 +63,9 @@ class HttpClient_BotAuth:
             self.conversation = ConversationApi(http)
             self.transfer = TransferApi(http, get_encrypted_pin)
 
+            # methods of high-frequency use
+            self.send_messages = self.message.send_messages
+
     def __init__(self, config: BotConfig, api_base: str = API_BASE_URLS.HTTP_DEFAULT):
         self.config = config
         self.http = _requests.HttpRequest(api_base, self._get_auth_token)
@@ -83,3 +87,6 @@ class HttpClient_BotAuth:
         return _sign.encrypt_pin(
             cfg.pin, cfg.pin_token, cfg.private_key, cfg.key_algorithm, cfg.session_id
         )
+
+    def get_conversation_id_with_user(self, user_id: str):
+        return get_conversation_id_of_two_users(self.config.client_id, user_id)

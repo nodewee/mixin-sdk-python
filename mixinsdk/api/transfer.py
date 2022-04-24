@@ -13,8 +13,9 @@ class TransferApi:
     def read_by_trace_id(self, trace_id: str):
         """Read transfer by trace ID.
         This API is only for reading transfers,
-        not deposits or withdrawals"""
-        self._http.get(f"/transfers/trace/{trace_id}")
+        not deposits or withdrawals
+        """
+        return self._http.get(f"/transfers/trace/{trace_id}")
 
     def send_to_user(
         self,
