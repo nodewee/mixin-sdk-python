@@ -1,6 +1,8 @@
 import asyncio
 import gzip
 import json
+import signal
+import sys
 import traceback
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -34,6 +36,8 @@ class BlazeClient:
         self.on_message_error_callback = on_message_error_callback
         self.ws = None
 
+        self._exiting = False
+
         print(f"bot id: {self.config.client_id}")
         print(f"\tname: {self.config.name}")
 
@@ -48,61 +52,109 @@ class BlazeClient:
             bodystring,
         )
 
-    async def connect(self):
-        if self.ws:
-            return
-
-        token = self._get_auth_token("GET", "/", "")
-        headers = {"Authorization": "Bearer " + token}
-        self.ws = await websockets.connect(
-            self.api_base, subprotocols=["Mixin-Blaze-1"], extra_headers=headers
-        )
-        print(f"Blaze client connected. (to {self.api_base}")
-
     async def run_forever(self, max_workers):
         """
         run websocket server forever
         """
 
+        # ----- For multi-threading to handle messages
         executors = ThreadPoolExecutor(max_workers=max_workers)
 
         def sync_handle_message(raw_msg):
-            # print("handle new message")
+            # For submit task to thread pool executor
+            if self._exiting:
+                return
             message = json.loads(gzip.decompress(raw_msg).decode())
-            asyncio.run(self.on_message(message))
+            asyncio.run(flow_control(message))
 
         def message_done_callback(future: asyncio.Future):
             error = future.exception()
             if error:
                 self.on_message_error_callback(error, traceback.format_exc())
 
+        # ----- For solved problem:
+        #       Asyncio Fatal Error on SSL Transport - IndexError Deque Index Out Of Range
+        async def waiter(event, message):
+            await event.wait()
+            await self.on_message(message)
+
+        async def flow_control(message):
+            event = asyncio.Event()
+            waiter_task = asyncio.create_task(waiter(event, message))
+            await asyncio.sleep(0.5)
+            event.set()
+            # Wait until the waiter task is finished.
+            await waiter_task
+
+        # ----- For handle KeyboardInterrupt
+        def sigint_handler(sig, frame):
+            self._exiting = True
+            print(" ⌨ KeyboardInterrupt is caught =====")
+            print("Shutting down the threads ...")
+            executors.shutdown(wait=True)
+            print("Exit")
+            sys.exit(0)
+
+        signal.signal(signal.SIGINT, sigint_handler)
+
+        # ----- Run websocket server forever
         while True:
-            await self.connect()
+            if self._exiting:
+                break
+            try:
+                # connect to server
+                auth_token = self._get_auth_token("GET", "/", "")
+                async with websockets.connect(
+                    self.api_base,
+                    subprotocols=["Mixin-Blaze-1"],
+                    extra_headers={"Authorization": f"Bearer {auth_token}"},
+                ) as websocket:
+                    print("Connected")
+                    self.ws = websocket
 
-            msg = {"id": str(uuid.uuid4()), "action": "LIST_PENDING_MESSAGES"}
-            await self._send_raw(msg)
-            print("waiting for message...")
+                    msg = {"id": str(uuid.uuid4()), "action": "LIST_PENDING_MESSAGES"}
+                    await self._send_raw(msg)
+                    print("waiting for message...")
 
-            while True:
-                if not self.ws:
-                    return
+                    while True:
+                        if self._exiting:
+                            break
+                        async for raw_msg in websocket:
+                            if self._exiting:
+                                break
+                            f = executors.submit(sync_handle_message, raw_msg)
+                            f.add_done_callback(message_done_callback)
+                self.ws = None
+                print("Connection closed")
+            except websockets.exceptions.ConnectionClosedError:
+                # reconnect automatically on errors
+                self.ws = None
+                print("Connection closed error. try to reconnect")
+                continue
+            except websockets.ConnectionClosed:
+                # reconnect automatically on errors
+                self.ws = None
+                print("Connection closed. to reconnect")
+                continue
+            except Exception as e:
+                self.ws = None
+                print("-" * 30)
+                print(traceback.format_exc())
+                print(str(e))
+                print("-" * 30)
+                break  # stop the client
 
-                try:
-                    raw_msg = await self.ws.recv()
-                except websockets.exceptions.ConnectionClosedError:
-                    self.ws = None
-                    break
-                except websockets.exceptions.ConnectionClosedOK:
-                    self.ws = None
-                    break
-
-                f = executors.submit(sync_handle_message, raw_msg)
-                f.add_done_callback(message_done_callback)
+        executors.shutdown(wait=True)
+        print("Blaze client stopped")
 
     def get_conversation_id_with_user(self, user_id: str):
         return get_conversation_id_of_two_users(self.config.client_id, user_id)
 
     async def _send_raw(self, obj):
+        if self._exiting:
+            return
+        if not self.ws:
+            raise Exception("websocket not connected")
         return await self.ws.send(gzip.compress(json.dumps(obj).encode()))
 
     async def echo(self, received_msg_id):
@@ -120,27 +172,19 @@ class BlazeClient:
 
     async def send_message(
         self,
-        msg_b64encoded_data,
-        msg_category,
+        msg_data_obj,
         conversation_id,
         message_id=None,
         recipient_id=None,
         quote_message_id=None,
     ):
-        # if not (to_user_id or to_group_id):
-        #     raise ValueError("to_user_id or to_group_id must be specified")
-        # if to_user_id:
-        #     conv_id = self.get_conversation_id_with_user(to_user_id)
-        # else:
-        #     conv_id = to_group_id
 
         # recipient_id = to_user_id
         msg = pack_message(
+            msg_data_obj,
             conversation_id,
-            msg_category,
-            msg_b64encoded_data,
-            message_id,
             recipient_id,
+            message_id,
             None,  # representative_id
             quote_message_id,
         )
