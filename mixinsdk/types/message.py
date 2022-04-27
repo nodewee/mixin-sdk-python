@@ -16,13 +16,13 @@ class _MessageCategory:
     POST: str = "PLAIN_POST"
 
     STICKER: str = "PLAIN_STICKER"
+    CONTACT: str = "PLAIN_CONTACT"
     IMAGE: str = "PLAIN_IMAGE"
-    AUDIO: str = "PLAIN_AUDIO"
     VIDEO: str = "PLAIN_VIDEO"
     LIVE: str = "PLAIN_LIVE"
-    CONTACT: str = "PLAIN_CONTACT"
-    LOCATION: str = "PLAIN_LOCATION"
+    AUDIO: str = "PLAIN_AUDIO"
     FILE: str = "PLAIN_DATA"
+    LOCATION: str = "PLAIN_LOCATION"
 
     APP_CARD: str = "APP_CARD"
     BUTTON_GROUP: str = "APP_BUTTON_GROUP"
@@ -194,15 +194,45 @@ def pack_image_data(
     attachment_id: str,
     mime_type: str,
     size: int,
-    width: int = None,
-    height: int = None,
-    thumbnail: str = None,
+    width: int,
+    height: int,
+    thumbnail: str,
 ):
     """
     Args:
-        attachment_id: read From POST /attachments
+        attachment_id: "read From POST /attachments"
         mime_type: e.g. "image/jpeg"
         size: image data bytes size
+        thumbnail: "base64 encoded"
+
+    Return (payload, b64encoded_data, category)
+    """
+    payload = {
+        "attachment_id": attachment_id,
+        "mime_type": mime_type,
+        "size": size,
+        "width": width,
+        "height": height,
+        "thumbnail": thumbnail,
+    }
+
+    b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.IMAGE)
+
+
+def pack_video_data(
+    attachment_id: str,
+    mime_type: str,
+    size: int,
+    width: int,
+    height: int,
+    duration: int,
+    thumbnail: str,
+):
+    """
+    Args:
+        attachment_id: "Read From POST /attachments"
+        mime_type: e.g. "video/mp4"
         thumbnail: "base64 encoded"
 
     Return (payload, b64encoded_data, category)
@@ -213,7 +243,86 @@ def pack_image_data(
         "width": width,
         "height": height,
         "size": size,
+        "duration": duration,
         "thumbnail": thumbnail,
     }
     b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
-    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.IMAGE)
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.VIDEO)
+
+
+def pack_audio_data(
+    attachment_id: str,
+    mime_type: str,
+    size: int,
+    duration: int,
+    waveform: str,
+):
+    """
+    Args:
+        attachment_id: "Read From POST /attachments"
+        mime_type: e.g. "audio/ogg"
+        "waveform": "audio waveform"
+
+    Return (payload, b64encoded_data, category)
+    """
+    payload = {
+        "attachment_id": attachment_id,
+        "mime_type": mime_type,
+        "size": size,
+        "duration": duration,
+        "waveform": waveform,
+    }
+    b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.AUDIO)
+
+
+def pack_livecard_data(
+    url: str, thumb_url: str, width: int, height: int, shareable: bool = True
+):
+    """
+    Args:
+        "url": "e.g. https://mixin.one/live.m3u8"
+        "thumb_url": "e.g. https://mixin.one/logo.png"
+
+    Return (payload, b64encoded_data, category)
+    """
+    payload = {
+        "url": url,
+        "thumb_url": thumb_url,
+        "width": width,
+        "height": height,
+        "shareable": shareable,
+    }
+    b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.LIVE)
+
+
+def pack_appcard_data(
+    app_id: str,
+    icon_url: str,
+    action: str,
+    title: str,
+    description: str = "",
+    shareable: bool = True,
+):
+
+    """
+    Args:
+        "app_id": "e.g. 7404c815-0393-4ea3-b9f2-b08efe4c72da"
+        "icon_url": "e.g. https://mixin.one/assets/98b586edb270556d1972112bd7985e9e.png"
+        "action": "e.g. https://mixin.one"
+        "title": "e.g. Mixin" // 1 <= size(title) <= 36
+        "description": "e.g. Hello World." // 1 <= size(description) <= 128
+
+    Return (payload, b64encoded_data, category)
+    """
+    payload = {
+        "app_id": app_id,
+        "icon_url": icon_url,
+        "action": action,
+        "title": title,
+        "description": description,
+        "shareable": shareable,
+    }
+    b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.APP_CARD)

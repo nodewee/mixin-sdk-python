@@ -1,5 +1,6 @@
 from mixinsdk.clients.http_client import BotConfig, HttpClient_BotAuth
 from mixinsdk.types.message import (
+    MessageDataObject,
     pack_button,
     pack_button_group_data,
     pack_contact_data,
@@ -62,6 +63,14 @@ def test_send_buttons():
     button2 = pack_button("Pay CNB", pay_uri, "#FF8000")
     msg = pack_message(
         pack_button_group_data([button1, button2]),
+        bot.get_conversation_id_with_user(MY_USER_ID),
+    )
+    bot.api.message.send_messages(msg)
+
+
+def test_send(msg_data_obj: MessageDataObject):
+    msg = pack_message(
+        msg_data_obj,
         bot.get_conversation_id_with_user(MY_USER_ID),
     )
     bot.api.message.send_messages(msg)

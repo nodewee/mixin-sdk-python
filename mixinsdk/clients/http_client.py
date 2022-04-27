@@ -1,7 +1,7 @@
 from ..constants import API_BASE_URLS
+from ..utils import get_conversation_id_of_two_users
 from . import _requests, _sign
 from .bot_config import BotConfig
-from ..utils import get_conversation_id_of_two_users
 
 
 class HttpClient_WithoutAuth:

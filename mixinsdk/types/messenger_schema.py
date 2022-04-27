@@ -2,8 +2,8 @@ import json
 import urllib.parse
 import uuid
 from base64 import b64encode
-from dataclasses import dataclass
 from collections import namedtuple
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -27,7 +27,8 @@ SharingDataObject = namedtuple(
 def generate_sharing_uri(
     sharing_data: SharingDataObject, conversation_id: str = None
 ) -> str:
-    uri = f"mixin://send?category={sharing_data.category}&data={sharing_data.b64encoded_data}"
+    uri = f"mixin://send?category={sharing_data.category}"
+    uri += f"&data={sharing_data.b64encoded_data}"
     if conversation_id:
         uri += f"&conversation_id={conversation_id}"
     return uri
@@ -100,7 +101,8 @@ def pack_payment_uri(
 
     trace_id = trace_id if trace_id else str(uuid.uuid4())
     amount = amount if isinstance(amount, str) else f"{amount:.8f}"
-    uri = f"mixin://pay?recipient={recipient_id}&asset={asset_id}&amount={amount}&trace={trace_id}"
+    uri = f"mixin://pay?recipient={recipient_id}&asset={asset_id}"
+    uri += f"&amount={amount}&trace={trace_id}"
     if memo:
         uri += f"&memo={urllib.parse.quote(memo)}"
     return uri
