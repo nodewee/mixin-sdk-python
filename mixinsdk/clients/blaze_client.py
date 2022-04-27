@@ -1,6 +1,7 @@
 import asyncio
 import gzip
 import json
+import logging
 import signal
 import sys
 import traceback
@@ -24,22 +25,25 @@ class BlazeClient:
         config: BotConfig,
         on_message: callable,
         on_message_error_callback: callable = None,
+        logger: logging.Logger = None,
         api_base: str = API_BASE_URLS.BLAZE_DEFAULT,
     ):
         """
         - on_message argument: message:dict
         - on_message_error_callback arguments: error:object, traceback_details:string
         """
-        self.api_base = api_base
         self.config = config
         self.on_message = on_message
         self.on_message_error_callback = on_message_error_callback
-        self.ws = None
+        self.logger = logger if logger else logging.getLogger("blaze client")
+        self.api_base = api_base
 
+        self.ws = None
         self._exiting = False
 
-        print(f"bot id: {self.config.client_id}")
-        print(f"\tname: {self.config.name}")
+        msg = f"bot id: {self.config.client_id}\n\tname: {self.config.name}"
+        self.logger.info(msg)
+        print(msg)
 
     def _get_auth_token(self, method: str, uri: str, bodystring: str):
         return sign_authentication_token(
@@ -73,7 +77,8 @@ class BlazeClient:
                 self.on_message_error_callback(error, traceback.format_exc())
 
         # ----- For solved problem:
-        #       Asyncio Fatal Error on SSL Transport - IndexError Deque Index Out Of Range
+        #   Asyncio Fatal Error on SSL Transport -
+        #   IndexError Deque Index Out Of Range
         async def waiter(event, message):
             await event.wait()
             await self.on_message(message)
@@ -89,10 +94,10 @@ class BlazeClient:
         # ----- For handle KeyboardInterrupt
         def sigint_handler(sig, frame):
             self._exiting = True
-            print(" ⌨ KeyboardInterrupt is caught =====")
-            print("Shutting down the threads ...")
+            self.logger.debug(" ⌨ KeyboardInterrupt is caught =====")
+            self.logger.debug("Shutting down the threads ...")
             executors.shutdown(wait=True)
-            print("Exit")
+            self.logger.info("KeyboardInterrupt to Exit")
             sys.exit(0)
 
         signal.signal(signal.SIGINT, sigint_handler)
@@ -110,11 +115,12 @@ class BlazeClient:
                     extra_headers={"Authorization": f"Bearer {auth_token}"},
                 ) as websocket:
                     print("Connected")
+                    self.logger.info("Connected")
                     self.ws = websocket
 
                     msg = {"id": str(uuid.uuid4()), "action": "LIST_PENDING_MESSAGES"}
                     await self._send_raw(msg)
-                    print("waiting for message...")
+                    self.logger.info("waiting for message...")
 
                     while True:
                         if self._exiting:
@@ -125,27 +131,27 @@ class BlazeClient:
                             f = executors.submit(sync_handle_message, raw_msg)
                             f.add_done_callback(message_done_callback)
                 self.ws = None
-                print("Connection closed")
+                self.logger.warn("Connection closed")
             except websockets.exceptions.ConnectionClosedError:
                 # reconnect automatically on errors
                 self.ws = None
-                print("Connection closed error. try to reconnect")
+                self.logger.error(
+                    "Connection closed error. try to reconnect.", exc_info=True
+                )
                 continue
             except websockets.ConnectionClosed:
                 # reconnect automatically on errors
                 self.ws = None
-                print("Connection closed. to reconnect")
+                self.logger.warn("Connection closed. to reconnect.", exc_info=True)
                 continue
             except Exception as e:
                 self.ws = None
-                print("-" * 30)
-                print(traceback.format_exc())
-                print(str(e))
-                print("-" * 30)
+                print(f"❌ Exception: {str(e)}")
+                self.logger.error("Exception occurred. stop the client", exc_info=True)
                 break  # stop the client
 
         executors.shutdown(wait=True)
-        print("Blaze client stopped")
+        self.logger.info("Blaze client stopped")
 
     def get_conversation_id_with_user(self, user_id: str):
         return get_conversation_id_of_two_users(self.config.client_id, user_id)
@@ -172,12 +178,15 @@ class BlazeClient:
 
     async def send_message(
         self,
-        msg_data_obj,
-        conversation_id,
+        msg_data_obj: dict,
+        conversation_id: str,
         message_id=None,
         recipient_id=None,
         quote_message_id=None,
     ):
+        """
+        - msg_data_obj, use types.message.pack_message() to make it
+        """
 
         # recipient_id = to_user_id
         msg = pack_message(
