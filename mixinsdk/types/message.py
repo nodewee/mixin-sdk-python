@@ -166,22 +166,20 @@ def pack_button(label, action, color) -> dict:
     Args:
     - label: button display text
     - action: URI, mixin schema or link, e.g. 'https://mixin.one'
-    - color: hex color string, e.g. '#d53120'
+    - color: hex color string, e.g. 'd53120'
 
     Return:
         payload:dict
     """
 
-    payload = {"label": label, "action": action, "color": color}
+    payload = {"label": label, "action": action, "color": "#" + color}
     return payload
 
 
 def pack_button_group_data(buttons: Union[Dict, List[Dict]]) -> MessageDataObject:
     """
     Args:
-        - buttons, list of button payload
-
-    Return (payload, b64encoded_data, category)
+        - buttons, list of button payload. maximum 6 buttons
     """
     if isinstance(buttons, Dict):
         buttons = [buttons]
@@ -204,8 +202,6 @@ def pack_image_data(
         mime_type: e.g. "image/jpeg"
         size: image data bytes size
         thumbnail: "base64 encoded"
-
-    Return (payload, b64encoded_data, category)
     """
     payload = {
         "attachment_id": attachment_id,
@@ -234,8 +230,6 @@ def pack_video_data(
         attachment_id: "Read From POST /attachments"
         mime_type: e.g. "video/mp4"
         thumbnail: "base64 encoded"
-
-    Return (payload, b64encoded_data, category)
     """
     payload = {
         "attachment_id": attachment_id,
@@ -262,8 +256,6 @@ def pack_audio_data(
         attachment_id: "Read From POST /attachments"
         mime_type: e.g. "audio/ogg"
         "waveform": "audio waveform"
-
-    Return (payload, b64encoded_data, category)
     """
     payload = {
         "attachment_id": attachment_id,
@@ -283,8 +275,6 @@ def pack_livecard_data(
     Args:
         "url": "e.g. https://mixin.one/live.m3u8"
         "thumb_url": "e.g. https://mixin.one/logo.png"
-
-    Return (payload, b64encoded_data, category)
     """
     payload = {
         "url": url,
@@ -313,8 +303,6 @@ def pack_appcard_data(
         "action": "e.g. https://mixin.one"
         "title": "e.g. Mixin" // 1 <= size(title) <= 36
         "description": "e.g. Hello World." // 1 <= size(description) <= 128
-
-    Return (payload, b64encoded_data, category)
     """
     payload = {
         "app_id": app_id,

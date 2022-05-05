@@ -58,9 +58,9 @@ def test_send_messages_in_batch():
 
 
 def test_send_buttons():
-    button1 = pack_button("Open Mixin Website", "https://mixin.one", "#9999ff")
+    button1 = pack_button("Open Mixin Website", "https://mixin.one", "9999ff")
     pay_uri = pack_payment_uri(bot.config.client_id, CNB_ASSET_ID, "0.00000001", "test")
-    button2 = pack_button("Pay CNB", pay_uri, "#FF8000")
+    button2 = pack_button("Pay CNB", pay_uri, "FF8000")
     msg = pack_message(
         pack_button_group_data([button1, button2]),
         bot.get_conversation_id_with_user(MY_USER_ID),

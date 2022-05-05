@@ -83,6 +83,25 @@ def pack_sharing_live(height: int, width: int, url: str, thumb_url: str):
     return SharingDataObject(payload, data, SHARING_CATEGORIES.LIVE)
 
 
+# -----
+
+
+def pack_input_action(text: str, at_mixin_number: str = None) -> str:
+    """
+    Arguments:
+    - at_mixin_number: str, optional,
+        use in group conversation to mention a specific user
+    """
+    action = "input:"
+    if at_mixin_number:
+        action += f"@{at_mixin_number} "
+    action += text
+    return action
+
+
+# -----
+
+
 def pack_payment_uri(
     recipient_id: str,
     asset_id: str,

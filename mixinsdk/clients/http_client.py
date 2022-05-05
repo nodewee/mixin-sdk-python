@@ -55,6 +55,7 @@ class HttpClient_BotAuth:
             from ..api.pin import PinApi
             from ..api.transfer import TransferApi
             from ..api.user import UserApi
+            from ..api.network import NetworkApi
 
             self.user = UserApi(http)
             self.message = MessageApi(http)
@@ -62,6 +63,7 @@ class HttpClient_BotAuth:
             self.pin = PinApi(http)
             self.conversation = ConversationApi(http)
             self.transfer = TransferApi(http, get_encrypted_pin)
+            self.network = NetworkApi(http)
 
             # methods of high-frequency use
             self.send_messages = self.message.send_messages
