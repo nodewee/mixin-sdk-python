@@ -1,3 +1,5 @@
+# Application case https://github.com/infowoods/oogway-mixin-bot
+
 import asyncio
 from mixinsdk.clients.bot_config import BotConfig
 from mixinsdk.clients.blaze_client import BlazeClient

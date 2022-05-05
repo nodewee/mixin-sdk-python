@@ -21,6 +21,7 @@ Runtime support: Python 3.9
 - [x] Support for client initialize from keystore, user OAuth token and without auth
 - [x] HTTP Client
 - [x] Blaze(Websocket) Client
+  - [x] Support for multi-threading to process messages
 - [x] User API
 - [ ] User Data Types
 - [x] PIN API
@@ -30,8 +31,8 @@ Runtime support: Python 3.9
 - [ ] Transfer, Transaction and Snapshot Data Types
 - [x] Network API
 - [ ] Conversation API
-- [ ] Message API
-- [ ] Message Data Types
+- [x] Message API
+- [x] Message Data Types
 - [ ] Circles API
 - [ ] Sharing Bots
 - [ ] Messenger Schema Data Types

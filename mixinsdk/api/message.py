@@ -1,3 +1,4 @@
+from io import FileIO
 from typing import List, Union
 
 from ..clients._requests import HttpRequest
@@ -17,3 +18,25 @@ class MessageApi:
         """
 
         return self._http.post("/messages", messages)
+
+    def create_attachment(self) -> dict:
+        """After creating action, then upload the attachment to upload_url,
+        and then the attachment_id can be used sending images,
+        videos, files and other messages.
+        """
+        payload = {"attachment_id": "", "upload_url": "", "view_url": ""}
+        return self._http.post("/attachments", payload)
+
+    def read_attachment(self, attachment_id: str):
+        """get a specific attachment metadata"""
+        return self._http.get(f"/attachments/{attachment_id}")
+
+    def upload_attachment(self, upload_url: str, file: Union[FileIO, bytes]):
+        """use create_attachment() to get upload_url"""
+        import httpx
+
+        headers = {}
+        headers["Content-Type"] = "application/octet-stream"
+        headers["x-amz-acl"] = "public-read"
+
+        return httpx.put(upload_url, data=file, headers=headers)
