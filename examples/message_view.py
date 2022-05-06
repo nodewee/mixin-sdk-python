@@ -24,5 +24,5 @@ response_of_sent_single_message = {
 def test_show_message():
     mv = message.MessageView.from_dict(response_of_sent_single_message["data"])
     print("decoded message data:", mv.data_decoded)
-    print("message struct:", mv.data_struct)
+    print("message structure:", mv.to_dict())
     print("created_at:", mv.created_at)

@@ -1,4 +1,4 @@
-from mixinsdk.clients.http_client import BotConfig, HttpClient_BotAuth
+from mixinsdk.clients.http_client import AppConfig, HttpClient_AppAuth
 from mixinsdk.types.message import (
     MessageDataObject,
     pack_button,
@@ -19,7 +19,7 @@ from ._example_vars import (
     STICKER_ID,
 )
 
-bot = HttpClient_BotAuth(BotConfig.from_file(BOT_CONFIG_FILE))
+bot = HttpClient_AppAuth(AppConfig.from_file(BOT_CONFIG_FILE))
 
 
 def test_send_text_message():

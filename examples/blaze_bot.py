@@ -1,16 +1,16 @@
 # Application case https://github.com/infowoods/oogway-mixin-bot
 
 import asyncio
-from mixinsdk.clients.bot_config import BotConfig
+from mixinsdk.clients.user_config import AppConfig
 from mixinsdk.clients.blaze_client import BlazeClient
-from mixinsdk.clients.http_client import HttpClient_BotAuth
+from mixinsdk.clients.http_client import HttpClient_AppAuth
 from mixinsdk.types.message import MessageView, pack_text_data
 
 
 class MixinBotClient:
     def __init__(self):
         self.blaze: BlazeClient = None
-        self.http: HttpClient_BotAuth = None
+        self.http: HttpClient_AppAuth = None
 
 
 def message_handle_error_callback(error, details):
@@ -69,9 +69,9 @@ async def message_handle(message):
             return
 
 
-bot_config = BotConfig.from_file("./data/bot-config-test.json")
+bot_config = AppConfig.from_file("./data/bot-config-test.json")
 bot = MixinBotClient()
-bot.http = HttpClient_BotAuth(bot_config)
+bot.http = HttpClient_AppAuth(bot_config)
 bot.blaze = BlazeClient(
     bot_config,
     on_message=message_handle,

@@ -1,4 +1,6 @@
 from ..clients._requests import HttpRequest
+from ..clients._sign import generate_ed25519_keypair
+import base64
 
 
 class UserApi:
@@ -61,3 +63,20 @@ class UserApi:
     def get_blocking_users(self):
         """Get the list of users that have been blocked"""
         return self._http.get("/blocking_users")
+
+    def create_network_user(self):
+        """Create a network user. Only application user can create network users."""
+
+        pk, sk = generate_ed25519_keypair()
+        pk_b64 = base64.b64encode(pk).decode()
+        sk_b64 = base64.b64encode(sk).decode()
+
+        payload = {
+            "session_secret": pk_b64,
+            "full_name": "A name",
+        }
+        r = self._http.post("/users", payload)
+
+        r["keypair"] = {"public_key": pk_b64, "private_key": sk_b64}
+
+        return r

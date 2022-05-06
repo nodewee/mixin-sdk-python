@@ -11,9 +11,9 @@ Based on:
 - <https://github.com/includeleec/mixin-python3-sdk>
 - <https://github.com/learnforpractice/mixin-python>
 
-**It is still in development, please do not use it in production environment.**
-
 Runtime support: Python 3.9
+
+**It is still in development, please do not use it in production environment.**
 
 ## Progress
 

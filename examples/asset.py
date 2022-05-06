@@ -1,11 +1,10 @@
-from mixinsdk.clients.bot_config import BotConfig
-from mixinsdk.clients.http_client import HttpClient_BotAuth, HttpClient_UserAuth
+from mixinsdk.clients.user_config import AppConfig
+from mixinsdk.clients.http_client import HttpClient_AppAuth
 
-from ._example_vars import BOT_CONFIG_FILE, USER_AUTH_TOKEN
+from ._example_vars import BOT_CONFIG_FILE
 
-cfg = BotConfig.from_file(BOT_CONFIG_FILE)
-botclient = HttpClient_BotAuth(cfg)
-userclient = HttpClient_UserAuth(USER_AUTH_TOKEN)
+cfg = AppConfig.from_file(BOT_CONFIG_FILE)
+botclient = HttpClient_AppAuth(cfg)
 
 
 def test_list_assets():

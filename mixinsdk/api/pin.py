@@ -12,25 +12,26 @@ class PinApi:
         Notice the iterator of the pin will increment also.
 
         params:
-        - encrypted_pin: use .encrypt() method to make it
+        - encrypted_pin: use client.get_current_encrypted_pin() to get it
         """
         body = {"pin": encrypted_pin}
 
         return self._http.post("/pin/verify", body)
 
-    def update(self, old_pin, new_pin):
+    def update(self, encrypted_old_pin, encrypted_new_pin):
         """
         Change the PIN of the user, or setup a new PIN if it is not set yet.
 
         params:
-        - old_pin: Encrypted old PIN or empty for setup a new PIN
-        - new_pin": Encrypted new PIN
+        - encrypted_old_pin: Use client.get_current_encrypted_pin() to get it.
+            Empty for setup a new PIN.
+        - encrypted_new_pin: Use client.encrypt_pin() to make it.
 
         PIN is used to manage user's addresses, assets and etc.
         There's no default PIN for a Mixin Network user (except APP).
         To set an initial PIN, set old_pin to an empty string.
         """
-        body = {"old_pin": old_pin, "pin": new_pin}
+        body = {"old_pin": encrypted_old_pin, "pin": encrypted_new_pin}
 
         return self._http.post("/pin/update", body)
 

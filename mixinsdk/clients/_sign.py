@@ -7,6 +7,8 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 import jwt
 import nacl.bindings
+import nacl.signing
+
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.asymmetric import padding as _padding
@@ -106,3 +108,11 @@ def encrypt_pin(
     encrypted_pin = iv + ciphertext
     encrypted_pin = urlsafe_b64encode(encrypted_pin).decode()
     return encrypted_pin
+
+
+def generate_ed25519_keypair():
+    "return (public_key, private_key)"
+    signing_key = nacl.signing.SigningKey.generate()
+    pk = signing_key.verify_key._key
+    sk = signing_key._signing_key
+    return (pk, sk)

@@ -1,11 +1,11 @@
-from mixinsdk.clients.bot_config import BotConfig
-from mixinsdk.clients.http_client import HttpClient_BotAuth, HttpClient_UserAuth
+from mixinsdk.clients.user_config import AppConfig
+from mixinsdk.clients.http_client import HttpClient_AppAuth, HttpClient_UserOAuth
 
 from ._example_vars import BOT_CONFIG_FILE, MY_USER_ID, USER_AUTH_TOKEN
 
-cfg = BotConfig.from_file(BOT_CONFIG_FILE)
-botclient = HttpClient_BotAuth(cfg)
-userclient = HttpClient_UserAuth(USER_AUTH_TOKEN)
+cfg = AppConfig.from_file(BOT_CONFIG_FILE)
+botclient = HttpClient_AppAuth(cfg)
+userclient = HttpClient_UserOAuth(USER_AUTH_TOKEN)
 
 
 # Read self profile with User's oauth access token
@@ -51,5 +51,11 @@ def test_get_friends():
 
 def test_get_blocking_users():
     r = botclient.api.user.get_blocking_users()
+    print(r)
+    assert r["data"] is not None
+
+
+def test_create_network_user():
+    r = botclient.api.user.create_network_user()
     print(r)
     assert r["data"] is not None

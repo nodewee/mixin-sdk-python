@@ -13,7 +13,7 @@ import websockets
 from ..constants import API_BASE_URLS
 from ..utils import get_conversation_id_of_two_users
 from ._sign import sign_authentication_token
-from .bot_config import BotConfig
+from .user_config import AppConfig
 
 
 class BlazeClient:
@@ -21,7 +21,7 @@ class BlazeClient:
 
     def __init__(
         self,
-        config: BotConfig,
+        config: AppConfig,
         on_message: callable,
         on_message_error_callback: callable = None,
         logger: logging.Logger = None,
