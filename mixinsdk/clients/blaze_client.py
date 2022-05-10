@@ -4,8 +4,10 @@ import json
 import logging
 import signal
 import sys
+import time
 import traceback
 import uuid
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 
 import websockets
@@ -39,6 +41,7 @@ class BlazeClient:
 
         self.ws = None
         self._exiting = False
+        self._sending_deque = deque()
 
         msg = f"bot id: {self.config.client_id}\n\tname: {self.config.name}"
         self.logger.info(msg)
@@ -55,51 +58,63 @@ class BlazeClient:
             bodystring,
         )
 
-    async def run_forever(self, max_workers):
+    def run_forever(self, max_workers):
         """
         run websocket server forever
         """
 
         # ----- For multi-threading to handle messages
-        executors = ThreadPoolExecutor(max_workers=max_workers)
+        #   Notice: websockets not support concurrent
+        receiver_pool = ThreadPoolExecutor(max_workers=max_workers)
+        sender_pool = ThreadPoolExecutor(max_workers=1)
 
-        def sync_handle_message(raw_msg):
-            # For submit task to thread pool executor
-            if self._exiting:
-                return
-            message = json.loads(gzip.decompress(raw_msg).decode())
-            asyncio.run(flow_control(message))
+        def sender():
+            self.logger.debug("sender started")
+            while True:
+                if self._exiting:
+                    break
+                if not self._sending_deque:
+                    time.sleep(0.1)
+                    continue
+                if not self.ws:
+                    time.sleep(0.1)
+                    continue
+                raw_msg = self._sending_deque.popleft()
+                try:
+                    asyncio.run(self.ws.send(raw_msg))
+                except Exception as e:
+                    self.logger.error("Exception occurred", exc_info=True)
+                    print("❌ Exception in sender:", e.__class__.__name__, str(e))
+            self.logger.debug("sender stopped")
 
-        def message_done_callback(future: asyncio.Future):
-            error = future.exception()
-            if error:
-                self.on_message_error_callback(error, traceback.format_exc())
-
-        # ----- For solved problem:
-        #   Asyncio Fatal Error on SSL Transport -
-        #   IndexError Deque Index Out Of Range
-        async def waiter(event, message):
-            await event.wait()
-            await self.on_message(message)
-
-        async def flow_control(message):
-            event = asyncio.Event()
-            waiter_task = asyncio.create_task(waiter(event, message))
-            await asyncio.sleep(0.5)
-            event.set()
-            # Wait until the waiter task is finished.
-            await waiter_task
+        sender_pool.submit(sender)
 
         # ----- For handle KeyboardInterrupt
         def sigint_handler(sig, frame):
             self._exiting = True
             self.logger.debug(" ⌨ KeyboardInterrupt is caught =====")
             self.logger.debug("Shutting down the threads ...")
-            executors.shutdown(wait=True)
-            self.logger.info("KeyboardInterrupt to Exit")
+            receiver_pool.shutdown(wait=True)
+            sender_pool.shutdown(wait=True)
+            self.logger.info("Keyboard Interrupt to Exit")
             sys.exit(0)
 
         signal.signal(signal.SIGINT, sigint_handler)
+
+        asyncio.run(self._running_loop(receiver_pool, sender_pool))
+
+    async def _running_loop(self, receiver_pool, sender_pool):
+        def sync_handle_message(raw_msg):
+            # For submit task to thread pool executor
+            if self._exiting:
+                return
+            message = json.loads(gzip.decompress(raw_msg).decode())
+            asyncio.run(self.on_message(message))
+
+        def message_done_callback(future: asyncio.Future):
+            error = future.exception()
+            if error:
+                self.on_message_error_callback(error, traceback.format_exc())
 
         # ----- Run websocket server forever
         while True:
@@ -113,13 +128,14 @@ class BlazeClient:
                     subprotocols=["Mixin-Blaze-1"],
                     extra_headers={"Authorization": f"Bearer {auth_token}"},
                 ) as websocket:
+
                     print("Connected")
                     self.logger.info("Connected")
                     self.ws = websocket
 
                     msg = {"id": str(uuid.uuid4()), "action": "LIST_PENDING_MESSAGES"}
                     await self._send_raw(msg)
-                    self.logger.info("waiting for message...")
+                    print("waiting for message...")
 
                     while True:
                         if self._exiting:
@@ -127,42 +143,35 @@ class BlazeClient:
                         async for raw_msg in websocket:
                             if self._exiting:
                                 break
-                            f = executors.submit(sync_handle_message, raw_msg)
+                            f = receiver_pool.submit(sync_handle_message, raw_msg)
                             f.add_done_callback(message_done_callback)
-                self.ws = None
-                self.logger.warn("Connection closed")
-            except websockets.exceptions.ConnectionClosedError:
-                # reconnect automatically on errors
-                self.ws = None
-                self.logger.error(
-                    "Connection closed error. try to reconnect.", exc_info=True
-                )
-                await asyncio.sleep(2)
-                continue
-            except websockets.ConnectionClosed:
-                # reconnect automatically on errors
-                self.ws = None
-                self.logger.warn("Connection closed. to reconnect.", exc_info=True)
-                await asyncio.sleep(2)
-                continue
-            except Exception as e:
-                self.ws = None
-                print(f"❌ Exception: {str(e)}")
-                self.logger.error("Exception occurred. stop the client", exc_info=True)
-                break  # stop the client
 
-        executors.shutdown(wait=True)
+            except Exception as e:
+                self.logger.error("Exception occurred", exc_info=True)
+                print(
+                    f"❌ Exception in websocket loop: {e.__class__.__name__} : {str(e)}"
+                )
+            finally:
+                if self._exiting:
+                    break
+                self.ws = None
+                self.logger.warn("Will try to reconnect in 2 seconds...")
+                await asyncio.sleep(2)
+
+        receiver_pool.shutdown(wait=True)
+        sender_pool.shutdown(wait=True)
+        print("Blaze client stopped")
         self.logger.info("Blaze client stopped")
 
     def get_conversation_id_with_user(self, user_id: str):
         return get_conversation_id_of_two_users(self.config.client_id, user_id)
 
-    async def _send_raw(self, obj):
+    async def _send_raw(self, obj) -> None:
+        """Add message to sending deque"""
         if self._exiting:
             return
-        if not self.ws:
-            raise Exception("websocket not connected")
-        return await self.ws.send(gzip.compress(json.dumps(obj).encode()))
+        raw_msg = gzip.compress(json.dumps(obj).encode())
+        self._sending_deque.append(raw_msg)
 
     async def echo(self, received_msg_id):
         """
@@ -182,10 +191,10 @@ class BlazeClient:
         - message, use types.message.pack_message() to make it
         """
 
-        raw_msg = {
+        msg = {
             "id": str(uuid.uuid4()),
             "action": "CREATE_MESSAGE",
             "params": message,
         }
-        await self._send_raw(raw_msg)
+        await self._send_raw(msg)
         return

@@ -8,7 +8,6 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 import jwt
 import nacl.bindings
 import nacl.signing
-
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.asymmetric import padding as _padding

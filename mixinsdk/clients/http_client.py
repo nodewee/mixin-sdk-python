@@ -52,10 +52,10 @@ class HttpClient_AppAuth:
             from ..api.asset import AssetApi
             from ..api.conversation import ConversationApi
             from ..api.message import MessageApi
+            from ..api.network import NetworkApi
             from ..api.pin import PinApi
             from ..api.transfer import TransferApi
             from ..api.user import UserApi
-            from ..api.network import NetworkApi
 
             self.user = UserApi(http)
             self.message = MessageApi(http)
@@ -112,10 +112,10 @@ class HttpClient_NetworkUserAuth:
             from ..api.asset import AssetApi
             from ..api.conversation import ConversationApi
             from ..api.message import MessageApi
+            from ..api.network import NetworkApi
             from ..api.pin import PinApi
             from ..api.transfer import TransferApi
             from ..api.user import UserApi
-            from ..api.network import NetworkApi
 
             self.user = UserApi(http)
             self.asset = AssetApi(http)

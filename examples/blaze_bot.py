@@ -1,10 +1,9 @@
 # Application case https://github.com/infowoods/oogway-mixin-bot
 
-import asyncio
 from mixinsdk.clients.user_config import AppConfig
 from mixinsdk.clients.blaze_client import BlazeClient
 from mixinsdk.clients.http_client import HttpClient_AppAuth
-from mixinsdk.types.message import MessageView, pack_text_data
+from mixinsdk.types.message import MessageView, pack_message, pack_text_data
 
 
 class MixinBotClient:
@@ -62,7 +61,7 @@ async def message_handle(message):
 
             if msgview.data_decoded == "hi":
                 await bot.blaze.send_message(
-                    pack_text_data("👋 hello"), msgview.conversation_id
+                    pack_message(pack_text_data("👋 hello"), msgview.conversation_id),
                 )
 
             await bot.blaze.echo(msgview.message_id)
@@ -79,4 +78,4 @@ bot.blaze = BlazeClient(
 )
 
 
-asyncio.run(bot.blaze.run_forever(2))
+bot.blaze.run_forever(2)

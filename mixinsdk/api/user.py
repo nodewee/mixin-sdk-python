@@ -1,6 +1,7 @@
+import base64
+
 from ..clients._requests import HttpRequest
 from ..clients._sign import generate_ed25519_keypair
-import base64
 
 
 class UserApi:

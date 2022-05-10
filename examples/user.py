@@ -23,7 +23,9 @@ def test_read_me_of_bot():
 
 
 def test_read_user():
-    r = botclient.api.user.get_user(MY_USER_ID)
+    # Team Mixin
+    r = botclient.api.user.get_user("773e5e77-4107-45c2-b648-8fc722ed77f5")
+    # r = botclient.api.user.get_user(MY_USER_ID)
     print(r)
     assert r["data"]
 
