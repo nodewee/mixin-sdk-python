@@ -1,8 +1,8 @@
 # Application case https://github.com/infowoods/oogway-mixin-bot
 
-from mixinsdk.clients.user_config import AppConfig
 from mixinsdk.clients.blaze_client import BlazeClient
 from mixinsdk.clients.http_client import HttpClient_AppAuth
+from mixinsdk.clients.user_config import AppConfig
 from mixinsdk.types.message import MessageView, pack_message, pack_text_data
 
 

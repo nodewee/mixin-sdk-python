@@ -5,9 +5,9 @@ from mixinsdk.types.message import (
     pack_button_group_data,
     pack_contact_data,
     pack_message,
-    pack_text_data,
     pack_post_data,
     pack_sticker_data,
+    pack_text_data,
 )
 from mixinsdk.types.messenger_schema import pack_payment_uri
 

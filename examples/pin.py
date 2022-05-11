@@ -1,5 +1,5 @@
-from mixinsdk.clients.user_config import AppConfig
 from mixinsdk.clients.http_client import HttpClient_AppAuth, HttpClient_UserAuth
+from mixinsdk.clients.user_config import AppConfig
 
 from ._example_vars import BOT_CONFIG_FILE, USER_AUTH_TOKEN
 

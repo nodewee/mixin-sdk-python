@@ -110,8 +110,6 @@ class HttpClient_NetworkUserAuth:
 
             # imports Api Classes only when it's required
             from ..api.asset import AssetApi
-            from ..api.conversation import ConversationApi
-            from ..api.message import MessageApi
             from ..api.network import NetworkApi
             from ..api.pin import PinApi
             from ..api.transfer import TransferApi

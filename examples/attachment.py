@@ -1,4 +1,5 @@
 from mixinsdk.clients.http_client import AppConfig, HttpClient_AppAuth
+
 from ._example_vars import BOT_CONFIG_FILE
 
 bot = HttpClient_AppAuth(AppConfig.from_file(BOT_CONFIG_FILE))
