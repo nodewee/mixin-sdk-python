@@ -33,7 +33,7 @@ class HttpRequest:
         request_id = request_id if request_id else str(uuid.uuid4())
         headers["X-Request-Id"] = request_id
 
-        r = self.session.get(url, headers=headers)
+        r = self.session.get(url, headers=headers, timeout=15)
 
         try:
             body_json = r.json()
@@ -71,7 +71,7 @@ class HttpRequest:
         request_id = request_id if request_id else str(uuid.uuid4())
         headers["X-Request-Id"] = request_id
 
-        r = self.session.post(url, headers=headers, data=bodystring)
+        r = self.session.post(url, headers=headers, data=bodystring, timeout=15)
 
         try:
             body_json = r.json()
