@@ -6,9 +6,7 @@ This is the [Mixin Network](https://mixin.one) SDK for Python.
 
 *Project objectives: ease of use and readability for developers.*
 
-**Status**
-
-This SDK is still considered a work in progress, therefore things might (and will) break with every update.
+**It is still in development, please do not use it in production environment.**
 
 ## Getting started
 
@@ -20,13 +18,13 @@ This SDK is still considered a work in progress, therefore things might (and wil
 
 ```bash
 cd mixin-sdk-python-main
-python3 -m venv env
+python3.9 -m venv env
 . env/bin/activate
 ```
 
 3. Install dependencies:
 
-`python3 -m pip install -r requirements.txt`
+`python3.9 -m pip install -r requirements.txt`
 
 4. Than see "examples" folder, and run it.
 

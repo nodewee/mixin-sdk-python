@@ -2,5 +2,5 @@ pyjwt
 cryptography
 pynacl
 httpx
-websocket-client
+websockets
 dacite
