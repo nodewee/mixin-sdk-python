@@ -1,22 +1,19 @@
 import json
 import uuid
 from typing import Union
-
-from ..types.errors import RequestError
+import httpx
+from ..types.errors import RequestError, RequestTimeout
 
 
 class HttpRequest:
-    def __init__(self, api_base, get_auth_token: callable, _custom_http_session=None):
-        self.get_auth_token = get_auth_token
-        # get_auth_token() parameters: method: str, uri: str, bodystring: str
-
+    def __init__(self, api_base, get_auth_token: callable):
+        """
+        - get_auth_token, function.
+            three parameters: http_method: str, url: str, bodystring: str
+        """
         self.api_base = api_base
-        if _custom_http_session:
-            self.session = _custom_http_session
-        else:
-            import httpx
-
-            self.session = httpx.Client()
+        self.get_auth_token = get_auth_token
+        self.session = httpx.Client()
 
     def get(self, path, query_params: dict = None, request_id=None):
         if query_params:
@@ -33,7 +30,12 @@ class HttpRequest:
         request_id = request_id if request_id else str(uuid.uuid4())
         headers["X-Request-Id"] = request_id
 
-        r = self.session.get(url, headers=headers)
+        try:
+            r = self.session.get(url, headers=headers, timeout=15)
+        except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.WriteTimeout) as e:
+            raise RequestTimeout(None, str(e))
+        except Exception as e:
+            raise RequestError(1, str(e))
 
         try:
             body_json = r.json()
@@ -71,7 +73,12 @@ class HttpRequest:
         request_id = request_id if request_id else str(uuid.uuid4())
         headers["X-Request-Id"] = request_id
 
-        r = self.session.post(url, headers=headers, data=bodystring)
+        try:
+            r = self.session.post(url, headers=headers, data=bodystring, timeout=15)
+        except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.WriteTimeout) as e:
+            raise RequestTimeout(None, str(e))
+        except Exception as e:
+            raise RequestError(1, str(e))
 
         try:
             body_json = r.json()

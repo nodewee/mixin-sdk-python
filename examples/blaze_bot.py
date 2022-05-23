@@ -1,9 +1,28 @@
-# Application case https://github.com/infowoods/oogway-mixin-bot
-
 from mixinsdk.clients.blaze_client import BlazeClient
 from mixinsdk.clients.http_client import HttpClient_AppAuth
 from mixinsdk.clients.user_config import AppConfig
 from mixinsdk.types.message import MessageView, pack_message, pack_text_data
+import time
+
+
+def use_logging():
+    import logging
+    from logging.handlers import RotatingFileHandler
+
+    log_handler = RotatingFileHandler(
+        "bot.log",
+        mode="a",
+        maxBytes=5 * 1024 * 1024,
+        backupCount=2,
+        encoding="utf-8",
+    )
+    log_handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(levelname)s - %(name)s - %(message)s")
+    )
+    log_handler.setLevel(logging.DEBUG)
+    logger = logging.getLogger("root")
+    logger.addHandler(log_handler)
+    logger.setLevel(logging.DEBUG)
 
 
 class MixinBotClient:
@@ -12,13 +31,11 @@ class MixinBotClient:
         self.http: HttpClient_AppAuth = None
 
 
-def message_handle_error_callback(error, details):
-    print("error_callback --- ")
-    print(f"error: {error}")
-    print(f"details: {details}")
+def on_error(client, error):
+    print(f"✗ Error: {error}")
 
 
-async def message_handle(message):
+def on_message(blaze: BlazeClient, message):
     global bot
     action = message["action"]
 
@@ -31,7 +48,7 @@ async def message_handle(message):
         return
 
     if action == "ERROR":
-        print(message["error"])
+        print("Received error message:", message["error"])
         return
         """example message={
             "id": "00000000-0000-0000-0000-000000000000",
@@ -60,22 +77,24 @@ async def message_handle(message):
             print(f"message from: {msgview.user_id}")
 
             if msgview.data_decoded == "hi":
-                await bot.blaze.send_message(
+                blaze.send_message(
                     pack_message(pack_text_data("👋 hello"), msgview.conversation_id),
                 )
+            elif msgview.data_decoded == "stop":
+                blaze.echo(msgview.message_id)
+                time.sleep(1.5)  # wait for sended echo message
+                blaze.close()
+                return
 
-            await bot.blaze.echo(msgview.message_id)
+            blaze.echo(msgview.message_id)
             return
 
 
+use_logging()
 bot_config = AppConfig.from_file("./data/bot-config-test.json")
 bot = MixinBotClient()
 bot.http = HttpClient_AppAuth(bot_config)
-bot.blaze = BlazeClient(
-    bot_config,
-    on_message=message_handle,
-    on_message_error_callback=message_handle_error_callback,
-)
+bot.blaze = BlazeClient(bot_config, on_message=on_message, on_error=on_error)
 
 
-bot.blaze.run_forever(2)
+bot.blaze.run_forever(3)

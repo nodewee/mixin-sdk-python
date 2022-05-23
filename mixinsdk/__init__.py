@@ -1,2 +1,2 @@
 """ Mixin SDK for Python """
-__VERSION__ = "0.1.4"
+__VERSION__ = "0.1.6"
