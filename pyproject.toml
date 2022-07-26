@@ -3,5 +3,5 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-line-length = 80
-target-version = ['py38','py39']
+line-length = 88 # default is 88
+target-version = ['py38', 'py39', 'py310']
