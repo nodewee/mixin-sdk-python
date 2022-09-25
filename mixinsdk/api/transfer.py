@@ -120,8 +120,8 @@ class TransferApi:
     # TODO: offset, support for more types: datetime, unix timestamp
     def get_snapshots_list(
         self,
-        offset: str,
-        limit: int,
+        offset: str = None,
+        limit: int = None,
         order: str = None,
         asset_id: str = None,
         opponent_id: str = None,
@@ -133,16 +133,20 @@ class TransferApi:
             !opponent and destination, tag can't use together,
             both of them don't support order.
 
-            - offset: *required*, pagination start time,
+            - offset: pagination start time,
                 e.g. `2020-12-12T12:12:12.999999999Z`.
-            - limit: *required*, the number of results to return,
+            - limit: the number of results to return,
                 pagination limit, maximally 500.
             - order: Order snapshots e.g. `ASC or DESC`.
             - asset_id: Optional, get transfers by asset.
             - opponent_id: Optional, get transfers by opponent (user or bot).
             - destination_id: Optional, get transfers by destination, only withdrawals.
         """
-        params = {"offset": offset, "limit": limit}
+        params = {}
+        if offset:
+            params["offset"] = offset
+        if limit:
+            params["limit"] = limit
         if order:
             params["order"] = order
         if asset_id:
@@ -155,5 +159,10 @@ class TransferApi:
         return self._http.get("/snapshots", params)
 
     def get_snapshot(self, snapshot_id: str):
-        """Get the snapshot of a user by snapshot id"""
+        """Get the snapshot of a user by snapshot id
+
+        Notice: This interface read received transfer will be 403 forbidden.
+            Could use get_snapshots_list() to get transfer trace_id,
+            then  use read_by_trace_id() to get transfer data.
+        """
         return self._http.get(f"/snapshots/{snapshot_id}")

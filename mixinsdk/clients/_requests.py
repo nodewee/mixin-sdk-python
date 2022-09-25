@@ -1,7 +1,9 @@
 import json
 import uuid
 from typing import Union
+
 import httpx
+
 from ..types.errors import RequestError, RequestTimeout
 
 
@@ -15,7 +17,7 @@ class HttpRequest:
         self.get_auth_token = get_auth_token
         self.session = httpx.Client()
 
-    def get(self, path, query_params: dict = None, request_id=None):
+    def get(self, path, query_params: dict = None, request_id=None, timeout=15):
         if query_params:
             params_string = "&".join(f"{k}={v}" for k, v in query_params.items())
             path = f"{path}?{params_string}"
@@ -31,7 +33,7 @@ class HttpRequest:
         headers["X-Request-Id"] = request_id
 
         try:
-            r = self.session.get(url, headers=headers, timeout=15)
+            r = self.session.get(url, headers=headers, timeout=timeout)
         except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.WriteTimeout) as e:
             raise RequestTimeout(None, str(e))
         except Exception as e:
@@ -57,7 +59,12 @@ class HttpRequest:
         return body_json
 
     def post(
-        self, path, body: Union[dict, list], query_params: dict = None, request_id=None
+        self,
+        path,
+        body: Union[dict, list],
+        query_params: dict = None,
+        request_id=None,
+        timeout=15,
     ):
         if query_params:
             params_string = "&".join(f"{k}={v}" for k, v in query_params.items())
@@ -74,7 +81,9 @@ class HttpRequest:
         headers["X-Request-Id"] = request_id
 
         try:
-            r = self.session.post(url, headers=headers, data=bodystring, timeout=15)
+            r = self.session.post(
+                url, headers=headers, data=bodystring, timeout=timeout
+            )
         except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.WriteTimeout) as e:
             raise RequestTimeout(None, str(e))
         except Exception as e:

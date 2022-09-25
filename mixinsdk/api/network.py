@@ -29,7 +29,7 @@ class NetworkApi:
         params = {}
         if kind:
             params["kind"] = kind
-        return self._http.get("/network", params)
+        return self._http.get("/network/assets/top", params)
 
     def search_asset_by_symbol(self, query: str, kind: str = "ALL"):
         """Search for popular assets by symbol or name.

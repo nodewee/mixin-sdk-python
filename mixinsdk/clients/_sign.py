@@ -15,7 +15,13 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
 def sign_authentication_token(
-    user_id, session_id, private_key, key_algorithm, method, uri, bodystring: str = None
+    user_id,
+    session_id,
+    private_key: bytes,
+    key_algorithm,
+    method,
+    uri,
+    bodystring: str = None,
 ):
     """
     JWT Structure: https://developers.mixin.one/docs/api/guide
