@@ -1,13 +1,16 @@
 import asyncio
 import gzip
 import json
-import sys
 import logging
 import signal
+import sys
 import time
 import uuid
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
+
+from mixinsdk.clients._message import encrypt_message_data
+from cryptography.hazmat.primitives.asymmetric import ed25519
 
 import websockets
 import websockets.client
@@ -16,6 +19,7 @@ from ..constants import API_BASE_URLS
 from ..utils import get_conversation_id_of_two_users
 from ._sign import sign_authentication_token
 from .user_config import AppConfig
+from ._message import parse_message_data
 
 
 class BlazeClient:
@@ -77,6 +81,9 @@ class BlazeClient:
         """
         - message, use types.message.pack_message() to make it
         """
+
+        # TODO : depends on switch of encryption
+        # message["data"]=
 
         msg = {
             "id": str(uuid.uuid4()),
@@ -183,21 +190,42 @@ class BlazeClient:
 
                 except websockets.ConnectionClosed:
                     self.logger.warn("websockets.ConnectionClosed")
-                    if self._stoping:
-                        break
                     time.sleep(2)
-                    continue  # reconnect automatically
+                    break  # to recreate websocket connection of new token, else invalid token
+                    # if self._stoping:
+                    #     break
                 except Exception as e:
                     self.logger.error("Exception occurred", exc_info=True)
                     self._callback(self.on_error, e)
-                    if self._stoping:
-                        break
                     time.sleep(2)
-                    continue
+                    break  # to recreate websocket connection of new token, else invalid token
+                    # if self._stoping:
+                    #     break
             # exited the websocket context, will closed the connection automatically
             self.logger.debug("exited the websocket context")
+
             if self._stoping:
-                break
+                break  # exit the while loop
+
+    def parse_message_data(self, data: str, category: str):
+        return parse_message_data(
+            data, category, self.config.session_id, self.config.private_key
+        )
+
+    def encrypt_message_data(self, data_b64_str: str):
+        pass
+        # # data = base64.b64encode(b"hello world").decode("utf-8")
+        # private = ed25519.Ed25519PrivateKey().from_private_bytes(
+        #     mixin_bot_config.private_key
+        # )
+        # public = private.public_key()
+        # user_session = UserSession(
+        #     mixin_bot_config.client_id, mixin_bot_config.session_id, public
+        # )
+        # data_encrypted = encrypt_message_data(
+        #     data, [user_session], mixin_bot_config.private_key
+        # )
+        # data_b64_str = base64.b64encode(data_encrypted).decode("utf-8")
 
     def start_to_list_pending_message(self):
         if not self.ws:

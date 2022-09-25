@@ -12,24 +12,30 @@ from ..utils import parse_rfc3339_to_datetime
 
 @dataclass(frozen=True)
 class _MessageCategory:
-    TEXT: str = "PLAIN_TEXT"
-    POST: str = "PLAIN_POST"
+    PLAIN_TEXT: str = "PLAIN_TEXT"
+    ENCRYPTED_TEXT: str = "ENCRYPTED_TEXT"
 
-    STICKER: str = "PLAIN_STICKER"
-    CONTACT: str = "PLAIN_CONTACT"
-    IMAGE: str = "PLAIN_IMAGE"
-    VIDEO: str = "PLAIN_VIDEO"
-    LIVE: str = "PLAIN_LIVE"
-    AUDIO: str = "PLAIN_AUDIO"
-    FILE: str = "PLAIN_DATA"
-    LOCATION: str = "PLAIN_LOCATION"
+    PLAIN_POST: str = "PLAIN_POST"
+    ENCRYPTED_POST: str = "ENCRYPTED_POST"
+
+    PLAIN_STICKER: str = "PLAIN_STICKER"
+
+    PLAIN_CONTACT: str = "PLAIN_CONTACT"
+    ENCRYPTED_CONTACT: str = "ENCRYPTED_CONTACT"
+
+    PLAIN_IMAGE: str = "PLAIN_IMAGE"
+    PLAIN_VIDEO: str = "PLAIN_VIDEO"
+    PLAIN_LIVE: str = "PLAIN_LIVE"
+    PLAIN_AUDIO: str = "PLAIN_AUDIO"
+    PLAIN_FILE: str = "PLAIN_DATA"
+    PLAIN_LOCATION: str = "PLAIN_LOCATION"
 
     APP_CARD: str = "APP_CARD"
     BUTTON_GROUP: str = "APP_BUTTON_GROUP"
 
     SYSTEM_ACCOUNT_SNAPSHOT: str = "SYSTEM_ACCOUNT_SNAPSHOT"
     SYSTEM_CONVERSATION: str = "SYSTEM_CONVERSATION"
-    TRANSCRIPT: str = "PLAIN_TRANSCRIPT"  # ?
+    TRANSCRIPT: str = "TRANSCRIPT"  # ?
 
     MESSAGE_RECALL: str = "MESSAGE_RECALL"
     MESSAGE_PIN: str = "MESSAGE_PIN"
@@ -58,7 +64,7 @@ class MessageView:
     updated_at: str
 
     def __post_init__(self):
-        self.data_decoded = _parse_msg_data(self.data, self.category)
+        self.data_parsed = None
         self.created_at = parse_rfc3339_to_datetime(self.created_at)
         self.updated_at = parse_rfc3339_to_datetime(self.updated_at)
 
@@ -68,25 +74,6 @@ class MessageView:
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
-
-
-def _parse_msg_data(data_str: str, category: str):
-    """
-    parse message data (Base64 encoded string) to str or dict
-
-    Returns: parsed_data
-    """
-    if not data_str:
-        return ""
-
-    d = base64.b64decode(data_str).decode()
-    if category in [MESSAGE_CATEGORIES.TEXT, MESSAGE_CATEGORIES.POST]:
-        return d
-
-    try:
-        return json.loads(d)
-    except json.JSONDecodeError:
-        print(f"Failed to json decode data: {d}")
 
 
 # ===== Message Request =====
@@ -130,19 +117,28 @@ def pack_message(
     return pld
 
 
-def pack_text_data(text) -> MessageDataObject:
+def pack_text_data(text, encrypt_func: callable = None) -> MessageDataObject:
     payload = text
-    return MessageDataObject(
-        text,
-        base64.b64encode(payload.encode("utf-8")).decode("utf-8"),
-        MESSAGE_CATEGORIES.TEXT,
-    )
+    if encrypt_func:
+        data_b64_str = encrypt_func(payload)
+        cat = MESSAGE_CATEGORIES.ENCRYPTED_TEXT
+    else:
+        data_b64_str = base64.b64encode(payload.encode("utf-8")).decode("utf-8")
+        cat = MESSAGE_CATEGORIES.PLAIN_TEXT
+
+    return MessageDataObject(payload, data_b64_str, cat)
 
 
-def pack_post_data(markdown_text) -> MessageDataObject:
+def pack_post_data(markdown_text, encrypt_func: callable = None) -> MessageDataObject:
     payload = markdown_text
-    b64encoded_data = base64.b64encode(payload.encode("utf-8")).decode("utf-8")
-    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.POST)
+    if encrypt_func:
+        data_b64_str = encrypt_func(payload)
+        cat = MESSAGE_CATEGORIES.ENCRYPTED_POST
+    else:
+        data_b64_str = base64.b64encode(payload.encode("utf-8")).decode("utf-8")
+        cat = MESSAGE_CATEGORIES.PLAIN_POST
+
+    return MessageDataObject(payload, data_b64_str, cat)
 
 
 def pack_sticker_data(sticker_id, album_id=None, name=None) -> MessageDataObject:
@@ -152,13 +148,13 @@ def pack_sticker_data(sticker_id, album_id=None, name=None) -> MessageDataObject
     if name:
         payload["name"] = name
     b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
-    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.STICKER)
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.PLAIN_STICKER)
 
 
 def pack_contact_data(user_id) -> MessageDataObject:
     payload = {"user_id": user_id}
     b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
-    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.CONTACT)
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.PLAIN_CONTACT)
 
 
 def pack_button(label, action, color) -> dict:
@@ -172,7 +168,9 @@ def pack_button(label, action, color) -> dict:
         payload:dict
     """
 
-    payload = {"label": label, "action": action, "color": "#" + color}
+    if not color.startswith("#"):
+        color = "#" + color
+    payload = {"label": label, "action": action, "color": color}
     return payload
 
 
@@ -213,7 +211,7 @@ def pack_image_data(
     }
 
     b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
-    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.IMAGE)
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.PLAIN_IMAGE)
 
 
 def pack_video_data(
@@ -223,13 +221,15 @@ def pack_video_data(
     width: int,
     height: int,
     duration: int,
-    thumbnail: str,
+    thumbnail: str = None,
+    created_at: str = None,
 ):
     """
     Args:
         attachment_id: "Read From POST /attachments"
         mime_type: e.g. "video/mp4"
         thumbnail: "base64 encoded"
+        created_at: "e.g. 2022-09-18T08:04:04.073818923Z"
     """
     payload = {
         "attachment_id": attachment_id,
@@ -238,10 +238,13 @@ def pack_video_data(
         "height": height,
         "size": size,
         "duration": duration,
-        "thumbnail": thumbnail,
     }
+    if thumbnail:
+        payload["thumbnail"] = thumbnail
+    if created_at:
+        payload["created_at"] = created_at
     b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
-    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.VIDEO)
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.PLAIN_VIDEO)
 
 
 def pack_audio_data(
@@ -250,12 +253,14 @@ def pack_audio_data(
     size: int,
     duration: int,
     waveform: str,
+    created_at: str = None,
 ):
     """
     Args:
         attachment_id: "Read From POST /attachments"
         mime_type: e.g. "audio/ogg"
-        "waveform": "audio waveform"
+        waveform: "audio waveform"
+        created_at: "e.g. 2022-09-18T08:04:04.073818923Z"
     """
     payload = {
         "attachment_id": attachment_id,
@@ -264,8 +269,10 @@ def pack_audio_data(
         "duration": duration,
         "waveform": waveform,
     }
+    if created_at:
+        payload["created_at"] = created_at
     b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
-    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.AUDIO)
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.PLAIN_AUDIO)
 
 
 def pack_livecard_data(
@@ -284,7 +291,7 @@ def pack_livecard_data(
         "shareable": shareable,
     }
     b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
-    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.LIVE)
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.PLAIN_LIVE)
 
 
 def pack_appcard_data(
