@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### unreleased v0.2.0-dev
+### unreleased v0.2.0
 
 Fix
 
