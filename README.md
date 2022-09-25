@@ -40,9 +40,8 @@ Changelog see file [CHANGELOG.md](https://github.com/nodewee/mixin-sdk-python/bl
 
 **TODO**
 
+- [ ] Support for send encrypted messages?
 - [ ] Address API
-- [ ] Manage group API
-- [ ] More messenger schema
 - [ ] Circles API
 - [ ] Upload Album
 - [ ] Withdrawal API

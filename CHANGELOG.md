@@ -1,6 +1,22 @@
 # CHANGELOG
 
-### unreleased v0.1.6-dev
+### unreleased v0.2.0-dev
+
+Fix
+
+- Fix mistake of blaze client reconnect
+- Fix URL path in /api/network
+
+New
+
+- Support for parsing encrypted messages
+- Add more APIs of conversation
+
+Change
+
+- Change app config key name: mixin-id -> mixin-number
+
+### unreleased v0.1.6
 
 New
 

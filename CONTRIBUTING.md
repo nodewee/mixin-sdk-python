@@ -17,10 +17,12 @@ We'd love to accept your patches and contributions to this project. There are ju
 
 3. Formatting code `isort .;black -l 88 -t py39 -t py310 .`
 
-4. Bump the version number([semantic versioning](https://semver.org/)), and update the changelog.
+4. Update CHANGELOG.md (If need be)
+
+5. Bump the version number([semantic versioning](https://semver.org/)), and update the changelog.
 
     Use `bumpversion major|minor|patch`
 
-5. Push your code to the repository.
+6. Push your code to the repository.
 
     Use `git push origin main --tags` to push your code to the repository.
