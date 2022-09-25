@@ -17,7 +17,7 @@ class AppConfig:
         session_id,
         pin_token,
         private_key,
-        mixin_id=None,
+        mixin_number=None,
         client_secret=None,
         name=None,
     ):
@@ -28,7 +28,7 @@ class AppConfig:
         self.session_id = session_id
         self.pin_token = base64_pad_equal_sign(pin_token)
         self.private_key = private_key
-        self.mixin_id = mixin_id
+        self.mixin_number = mixin_number
         self.client_secret = client_secret
         self.name = name
         #
@@ -50,7 +50,7 @@ class AppConfig:
             "session_id": "",
             "pin_token": "",
             "private_key": "",
-            "mixin_id": "",
+            "mixin_number": "",
             "client_secret": ""
             "name": ""
         }
@@ -65,7 +65,7 @@ class AppConfig:
             payload["session_id"],
             payload["pin_token"],
             payload["private_key"],
-            payload.get("mixin_id"),
+            payload.get("mixin_number"),
             payload.get("client_secret"),
             payload.get("name"),
         )
