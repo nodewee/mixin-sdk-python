@@ -15,29 +15,34 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 import websockets
 import websockets.client
 
+from mixinsdk.types.user import UserProfile
+
 from ..constants import API_BASE_URLS
 from ..utils import get_conversation_id_of_two_users
 from ._sign import sign_authentication_token
-from .user_config import AppConfig
+from .config import AppConfig
 from ._message import parse_message_data
 
 
 class BlazeClient:
-    """WebSocket client with bot config"""
+    """WebSocket client with keystore"""
 
     def __init__(
         self,
         config: AppConfig,
+        profile: UserProfile = None,
         on_message: callable = None,
         on_error: callable = None,
         api_base: str = API_BASE_URLS.BLAZE_DEFAULT,
         auto_start_list_pending_message=True,
     ):
         """
-        - on_message, function, 2 arguments: the_client, message:dict
-        - on_error, function, 2 arguments: the_client, error:Exception
+        - on_message, function, 2 arguments: blaze_client, message:dict
+        - on_error, function, 2 arguments: blaze_client, error:Exception
         """
         self.config = config
+        self.profile = profile
+
         self.on_message = on_message
         self.on_error = on_error
         self.logger = logging.getLogger("blaze-client")
@@ -135,9 +140,8 @@ class BlazeClient:
 
         self._msg_sender.submit(sender)
 
-        msg = f"Bot id: {self.config.client_id} (name: {self.config.name})"
+        msg = f"Blaze client ID: {self.config.client_id}"
         self.logger.info(msg)
-        print(msg, flush=True)
 
         # Run websocket forever
         self.loop = asyncio.get_event_loop()
@@ -216,14 +220,14 @@ class BlazeClient:
         pass
         # # data = base64.b64encode(b"hello world").decode("utf-8")
         # private = ed25519.Ed25519PrivateKey().from_private_bytes(
-        #     mixin_bot_config.private_key
+        #     self.config..private_key
         # )
         # public = private.public_key()
         # user_session = UserSession(
-        #     mixin_bot_config.client_id, mixin_bot_config.session_id, public
+        #     self.config..client_id, self.config..session_id, public
         # )
         # data_encrypted = encrypt_message_data(
-        #     data, [user_session], mixin_bot_config.private_key
+        #     data, [user_session], self.config..private_key
         # )
         # data_b64_str = base64.b64encode(data_encrypted).decode("utf-8")
 

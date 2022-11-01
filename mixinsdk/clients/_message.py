@@ -26,7 +26,7 @@ def parse_message_data(
 
     if category.startswith("ENCRYPTED_"):
         d = decrypt_message_data(data, app_session_id, app_private_key)
-        print("\ndecrypted:", d)
+        # print("\ndecrypted:", d)
     else:
         d = base64.b64decode(data).decode()
 

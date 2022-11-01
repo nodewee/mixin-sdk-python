@@ -35,7 +35,7 @@ class HttpRequest:
         try:
             r = self.session.get(url, headers=headers, timeout=timeout)
         except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.WriteTimeout) as e:
-            raise RequestTimeout(None, str(e))
+            raise RequestTimeout(None, str(e)) from None
         except Exception as e:
             raise RequestError(1, str(e))
 
@@ -85,7 +85,7 @@ class HttpRequest:
                 url, headers=headers, data=bodystring, timeout=timeout
             )
         except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.WriteTimeout) as e:
-            raise RequestTimeout(None, str(e))
+            raise RequestTimeout(None, str(e)) from None
         except Exception as e:
             raise RequestError(1, str(e))
 

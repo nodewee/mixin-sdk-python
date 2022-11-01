@@ -1,15 +1,11 @@
 from ..constants import API_BASE_URLS
 from ..utils import get_conversation_id_of_two_users
-from .user_config import AppConfig, NetworkUserConfig
+from .config import AppConfig, NetworkUserConfig
 from . import _requests
 from . import _sign
 
-from .http_client_no_sign import HttpClient_UserOAuth, HttpClient_WithoutAuth
 
-
-class HttpClient_AppAuth:
-    """HTTP Client with application config"""
-
+class HttpClient_WithAppConfig:
     class _ApiInterface:
         def __init__(self, http, get_current_encrypted_pin: callable):
 
@@ -35,6 +31,7 @@ class HttpClient_AppAuth:
 
     def __init__(self, config: AppConfig, api_base: str = API_BASE_URLS.HTTP_DEFAULT):
         self.config = config
+
         self.http = _requests.HttpRequest(api_base, self._get_auth_token)
         self.api = self._ApiInterface(self.http, self.get_current_encrypted_pin)
 
@@ -67,9 +64,7 @@ class HttpClient_AppAuth:
         )
 
 
-class HttpClient_NetworkUserAuth:
-    """HTTP Client with network user config (created by application user)"""
-
+class HttpClient_WithNetworkUserConfig:
     class _ApiInterface:
         def __init__(self, http, get_current_encrypted_pin: callable):
 
@@ -95,7 +90,7 @@ class HttpClient_NetworkUserAuth:
 
     def _get_auth_token(self, method: str, uri: str, bodystring: str):
         return _sign.sign_authentication_token(
-            self.config.user_id,
+            self.config.client_id,
             self.config.session_id,
             self.config.private_key,
             self.config.key_algorithm,
@@ -103,9 +98,6 @@ class HttpClient_NetworkUserAuth:
             uri,
             bodystring,
         )
-
-    def get_conversation_id_with_user(self, user_id: str):
-        return get_conversation_id_of_two_users(self.config.user_id, user_id)
 
     def get_current_encrypted_pin(self):
         return self.encrypt_pin(self.config.pin)

@@ -10,17 +10,7 @@ class AppConfig:
     (such as Mixin Messenger bot)
     """
 
-    def __init__(
-        self,
-        pin,
-        client_id,
-        session_id,
-        pin_token,
-        private_key,
-        mixin_number=None,
-        client_secret=None,
-        name=None,
-    ):
+    def __init__(self, pin, client_id, session_id, pin_token, private_key):
         """You can get bot config value from https://developers.mixin.one/dashboard"""
 
         self.pin = pin
@@ -28,9 +18,6 @@ class AppConfig:
         self.session_id = session_id
         self.pin_token = base64_pad_equal_sign(pin_token)
         self.private_key = private_key
-        self.mixin_number = mixin_number
-        self.client_secret = client_secret
-        self.name = name
         #
         self.key_algorithm = ""  # Ed25519 or RS512 (EdDSA:Ed25519, RSA:RS512)
         if "RSA PRIVATE KEY" in self.private_key:
@@ -45,14 +32,11 @@ class AppConfig:
         """
         payload structure:
         {
-            "pin": "",
-            "client_id": "",
-            "session_id": "",
-            "pin_token": "",
-            "private_key": "",
-            "mixin_number": "",
-            "client_secret": ""
-            "name": ""
+            "pin": "required",
+            "client_id": "required",
+            "session_id": "required",
+            "pin_token": "required",
+            "private_key": "required"
         }
         """
 
@@ -65,9 +49,6 @@ class AppConfig:
             payload["session_id"],
             payload["pin_token"],
             payload["private_key"],
-            payload.get("mixin_number"),
-            payload.get("client_secret"),
-            payload.get("name"),
         )
         return c
 
@@ -111,7 +92,7 @@ class NetworkUserConfig:
         self.key_algorithm = "Ed25519"
 
     @classmethod
-    def from_payload(cls, payload: dict) -> "AppConfig":
+    def from_payload(cls, payload: dict) -> "NetworkUserConfig":
         """
         payload structure:
         {
@@ -138,6 +119,6 @@ class NetworkUserConfig:
         return c
 
     @classmethod
-    def from_file(cls, file_path: str) -> "AppConfig":
+    def from_file(cls, file_path: str) -> "NetworkUserConfig":
         with open(file_path, "rt") as f:
             return cls.from_payload(f.read())

@@ -22,8 +22,7 @@ class HttpClient_WithoutAuth:
         return None
 
 
-class HttpClient_UserOAuth:
-    """HTTP Client with Mixin user's oauth token"""
+class HttpClient_WithAccessToken:
 
     class _ApiInterface:
         def __init__(self, http):
@@ -31,8 +30,8 @@ class HttpClient_UserOAuth:
 
             self.user = UserApi(http)
 
-    def __init__(self, auth_token: str, api_base: str = API_BASE_URLS.HTTP_DEFAULT):
-        self.auth_token = auth_token
+    def __init__(self, access_token: str, api_base: str = API_BASE_URLS.HTTP_DEFAULT):
+        self.auth_token = access_token
         self.http = _requests.HttpRequest(api_base, self._get_auth_token)
         self.api = self._ApiInterface(self.http)
 
