@@ -1,10 +1,11 @@
 import datetime
 
-from mixinsdk.clients.http_client import AppConfig, HttpClient_AppAuth
+from mixinsdk.clients.client_blaze import HttpClient_WithAppConfig
+from mixinsdk.clients.config import AppConfig
 
-from ._example_vars import BOT_CONFIG_FILE, CNB_ASSET_ID, MY_USER_ID
+from ._example_vars import APP_CONFIG_FILE, CNB_ASSET_ID, MY_USER_ID
 
-client = HttpClient_AppAuth(AppConfig.from_file(BOT_CONFIG_FILE))
+client = HttpClient_WithAppConfig(AppConfig.from_file(APP_CONFIG_FILE))
 
 
 def test_send_transfer():

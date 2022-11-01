@@ -1,4 +1,4 @@
-from mixinsdk.clients.http_client import HttpClient_WithoutAuth
+from mixinsdk.clients.client_http_nosign import HttpClient_WithoutAuth
 
 client = HttpClient_WithoutAuth()
 

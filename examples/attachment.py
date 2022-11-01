@@ -1,8 +1,9 @@
-from mixinsdk.clients.http_client import AppConfig, HttpClient_AppAuth
+from mixinsdk.clients.client_http import HttpClient_WithAppConfig
+from mixinsdk.clients.config import AppConfig
 
-from ._example_vars import BOT_CONFIG_FILE
+from ._example_vars import APP_CONFIG_FILE
 
-bot = HttpClient_AppAuth(AppConfig.from_file(BOT_CONFIG_FILE))
+bot = HttpClient_WithAppConfig(AppConfig.from_file(APP_CONFIG_FILE))
 
 # create attachment
 r = bot.api.message.create_attachment()

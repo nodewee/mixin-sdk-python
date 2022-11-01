@@ -1,4 +1,7 @@
-from mixinsdk.clients.http_client import AppConfig, HttpClient_AppAuth
+import sys
+from mixinsdk.clients.client_http import HttpClient_WithAppConfig
+from mixinsdk.clients.config import AppConfig
+
 from mixinsdk.types.message import (
     MessageDataObject,
     pack_button,
@@ -12,14 +15,22 @@ from mixinsdk.types.message import (
 from mixinsdk.types.messenger_schema import pack_payment_uri
 
 from ._example_vars import (
-    BOT_CONFIG_FILE,
+    APP_CONFIG_FILE,
     CNB_ASSET_ID,
     MY_GROUP_ID,
     MY_USER_ID,
     STICKER_ID,
 )
 
-bot = HttpClient_AppAuth(AppConfig.from_file(BOT_CONFIG_FILE))
+if not MY_USER_ID:
+    print("✘ Please fill MY_USER_ID in _example_vars.py")
+    sys.exit(0)
+
+if not MY_GROUP_ID:
+    print("✘ Please fill MY_GROUP_ID in _example_vars.py")
+    sys.exit(0)
+
+bot = HttpClient_WithAppConfig(AppConfig.from_file(APP_CONFIG_FILE))
 
 
 def test_send_text_message():
@@ -68,9 +79,9 @@ def test_send_buttons():
     bot.api.message.send_messages(msg)
 
 
-def test_send(msg_data_obj: MessageDataObject):
-    msg = pack_message(
-        msg_data_obj,
-        bot.get_conversation_id_with_user(MY_USER_ID),
-    )
-    bot.api.message.send_messages(msg)
+# def test_send(msg_data_obj: MessageDataObject):
+#     msg = pack_message(
+#         msg_data_obj,
+#         bot.get_conversation_id_with_user(MY_USER_ID),
+#     )
+#     bot.api.message.send_messages(msg)
