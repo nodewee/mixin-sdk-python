@@ -1,15 +1,17 @@
 import base64
-import uuid
+import json
 import os
+import uuid
+from typing import List, Union
+
+import nacl.bindings
+from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
 from mixinsdk.types.user import UserSession
 from mixinsdk.utils import base64_pad_equal_sign
 
-import nacl.bindings
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from typing import List, Union
 from ..types.message import MESSAGE_CATEGORIES
-import json
-from cryptography.hazmat.primitives.asymmetric import ed25519
 
 
 def parse_message_data(

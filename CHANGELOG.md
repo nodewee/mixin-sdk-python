@@ -14,7 +14,7 @@ New
 
 Change
 
-- Change app config key name: mixin-id -> mixin-number
+- Change class names and property names
 
 ### unreleased v0.1.6
 

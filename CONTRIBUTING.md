@@ -15,7 +15,7 @@ We'd love to accept your patches and contributions to this project. There are ju
 
     Use `pytest tests` to run all tests automatically.
 
-3. Formatting code `isort .;black -l 88 -t py39 -t py310 .`
+3. Formatting code `isort mixinsdk;black -l 88 -t py39 -t py310 mixinsdk`
 
 4. Update CHANGELOG.md (If need be)
 

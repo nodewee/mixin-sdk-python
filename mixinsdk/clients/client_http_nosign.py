@@ -23,7 +23,6 @@ class HttpClient_WithoutAuth:
 
 
 class HttpClient_WithAccessToken:
-
     class _ApiInterface:
         def __init__(self, http):
             from ..api.user import UserApi

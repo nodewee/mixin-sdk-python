@@ -9,19 +9,18 @@ import uuid
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 
-from mixinsdk.clients._message import encrypt_message_data
-from cryptography.hazmat.primitives.asymmetric import ed25519
-
 import websockets
 import websockets.client
+from cryptography.hazmat.primitives.asymmetric import ed25519
 
+from mixinsdk.clients._message import encrypt_message_data
 from mixinsdk.types.user import UserProfile
 
 from ..constants import API_BASE_URLS
 from ..utils import get_conversation_id_of_two_users
+from ._message import parse_message_data
 from ._sign import sign_authentication_token
 from .config import AppConfig
-from ._message import parse_message_data
 
 
 class BlazeClient:
