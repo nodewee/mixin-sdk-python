@@ -1,4 +1,8 @@
-APP_CONFIG_FILE = "../bot-keystore-file.json"
+import os
+
+APP_CONFIG_FILE = os.path.join(
+    os.path.dirname(__file__), "..", "bot-keystore-file.json"
+)
 USER_AUTH_TOKEN = ""
 
 

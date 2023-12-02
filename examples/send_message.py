@@ -1,7 +1,14 @@
 import sys
+
+from examples._example_vars import (
+    APP_CONFIG_FILE,
+    CNB_ASSET_ID,
+    MY_GROUP_ID,
+    MY_USER_ID,
+    STICKER_ID,
+)
 from mixinsdk.clients.client_http import HttpClient_WithAppConfig
 from mixinsdk.clients.config import AppConfig
-
 from mixinsdk.types.message import (
     MessageDataObject,
     pack_button,
@@ -13,14 +20,6 @@ from mixinsdk.types.message import (
     pack_text_data,
 )
 from mixinsdk.types.messenger_schema import pack_payment_uri
-
-from ._example_vars import (
-    APP_CONFIG_FILE,
-    CNB_ASSET_ID,
-    MY_GROUP_ID,
-    MY_USER_ID,
-    STICKER_ID,
-)
 
 if not MY_USER_ID:
     print("✘ Please fill MY_USER_ID in _example_vars.py")
