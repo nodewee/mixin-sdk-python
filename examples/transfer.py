@@ -1,9 +1,8 @@
 import datetime
 
+from examples._example_vars import APP_CONFIG_FILE, CNB_ASSET_ID, MY_USER_ID
 from mixinsdk.clients.client_blaze import HttpClient_WithAppConfig
 from mixinsdk.clients.config import AppConfig
-
-from ._example_vars import APP_CONFIG_FILE, CNB_ASSET_ID, MY_USER_ID
 
 client = HttpClient_WithAppConfig(AppConfig.from_file(APP_CONFIG_FILE))
 

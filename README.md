@@ -12,6 +12,14 @@ This SDK is still considered a work in progress, therefore things might (and wil
 
 ## Getting started
 
+For sdk user:
+
+```bash
+pip install mixinsdk
+```
+
+For sdk dev:
+
 > Runtime support: Python 3.9+
 
 1. Clone the repository, or download code.
@@ -22,6 +30,9 @@ This SDK is still considered a work in progress, therefore things might (and wil
 cd mixin-sdk-python-main
 python3 -m venv .env
 . .env/bin/activate
+
+# for windows
+# .\.env\Scripts\activate
 ```
 
 3. Install dependencies:
@@ -62,4 +73,4 @@ Changelog see file [CHANGELOG.md](https://github.com/nodewee/mixin-sdk-python/bl
 
 ## License
 
-The project is licensed under the GNU GPL v3.0 - see the [LICENSE](https://github.com/nodewee/mixin-sdk-python/blob/main/LICENSE) file for details
+The project is licensed under the MIT License - see the [LICENSE](https://github.com/nodewee/mixin-sdk-python/blob/main/LICENSE) file for details.

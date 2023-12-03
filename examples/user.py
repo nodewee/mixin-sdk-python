@@ -1,8 +1,7 @@
+from examples._example_vars import APP_CONFIG_FILE, MY_USER_ID, USER_AUTH_TOKEN
 from mixinsdk.clients.client_http import HttpClient_WithAppConfig
 from mixinsdk.clients.client_http_nosign import HttpClient_WithAccessToken
 from mixinsdk.clients.config import AppConfig
-
-from ._example_vars import APP_CONFIG_FILE, MY_USER_ID, USER_AUTH_TOKEN
 
 cfg = AppConfig.from_file(APP_CONFIG_FILE)
 appclient = HttpClient_WithAppConfig(cfg)
