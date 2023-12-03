@@ -30,7 +30,7 @@ def generate_sharing_uri(
     uri = f"mixin://send?category={sharing_data.category}"
     uri += f"&data={sharing_data.b64encoded_data}"
     if conversation_id:
-        uri += f"&conversation_id={conversation_id}"
+        uri += f"&conversation={conversation_id}"
     return uri
 
 
@@ -127,7 +127,13 @@ def pack_payment_uri(
     return uri
 
 
-# TODO: more payment schema types
+def pack_user_uri(user_id: str):
+    uri = f"mixin://users/{user_id}"
+    return uri
 
 
-# TODO: other schema types
+# def pack_bot_uri():
+#     """
+#     action is an optional parameter, the bot pop-up window will open in the absence of it, passing action=open will open the bot homepage; key1=value1&key2=value2&key3=value3... Parameters of any name or type can be passed when opening the bot homepage to facilitate the development of features like invitation codes, visitor tracking, etc.
+#     """
+#     url = f"mixin://apps/:appid?action=open&key1=value1&key2=value2&key3=value3..."
