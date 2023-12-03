@@ -284,6 +284,29 @@ def pack_audio_data(
     return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.PLAIN_AUDIO)
 
 
+def pack_file_data(
+    attachment_id: str,
+    mime_type: str,
+    size: int,
+    name: str,
+):
+    """
+    Args:
+        attachment_id: "Read From POST /attachments"
+        mime_type: e.g. "application/pdf",
+        "size": 1024
+        "name": "example.pdf"
+    """
+    payload = {
+        "attachment_id": attachment_id,
+        "mime_type": mime_type,
+        "size": size,
+        "name": name,
+    }
+    b64encoded_data = base64.b64encode(json.dumps(payload).encode()).decode()
+    return MessageDataObject(payload, b64encoded_data, MESSAGE_CATEGORIES.PLAIN_FILE)
+
+
 def pack_livecard_data(
     url: str, thumb_url: str, width: int, height: int, shareable: bool = True
 ):
@@ -311,7 +334,6 @@ def pack_appcard_data(
     description: str = "",
     shareable: bool = True,
 ):
-
     """
     Args:
         "app_id": "e.g. 7404c815-0393-4ea3-b9f2-b08efe4c72da"
