@@ -108,6 +108,7 @@ def pack_payment_uri(
     amount: str,
     memo: str = None,
     trace_id: str = None,
+    version: str = "origin",  # origin or safe
 ) -> str:
     """
     - recipient_id, *required*, user id of the receiver
@@ -121,6 +122,8 @@ def pack_payment_uri(
     trace_id = trace_id if trace_id else str(uuid.uuid4())
     amount = amount if isinstance(amount, str) else f"{amount:.8f}"
     uri = f"mixin://pay?recipient={recipient_id}&asset={asset_id}"
+    if version == "safe":
+        uri = f"https://mixin.one/pay/{recipient_id}?asset={asset_id}"
     uri += f"&amount={amount}&trace={trace_id}"
     if memo:
         uri += f"&memo={urllib.parse.quote(memo)}"
