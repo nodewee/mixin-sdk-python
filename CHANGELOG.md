@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### ver 0.2.2 (unreleased)
+### ver 0.2.3 (unreleased)
 
 - change license to MIT
 - add file data structure packer
