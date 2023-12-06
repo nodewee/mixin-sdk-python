@@ -1,5 +1,21 @@
 # CHANGELOG
 
+### ver 0.2.2 (unreleased)
+
+- change license to MIT
+- add file data structure packer
+- add some mixin safe supports: payment uri, snapshots list (#4)
+- fix and add mixin uri schema: sharing uri, user uri
+- add encryption support for sending message (*unsuccessfully*)
+- update examples:
+  - add blaze client example (#4)
+  - add safe example (#5)
+  - improve examples structure
+- update docs:
+  - update README.md and improve CONTRIBUTING.md
+  - include updated records in CHANGELOG.md.
+
+
 ### v0.2.1
 
 Fix
