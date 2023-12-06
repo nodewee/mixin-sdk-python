@@ -4,7 +4,6 @@
 
 This is the [Mixin Network](https://mixin.one) SDK for Python.
 
-*Project objectives: ease of use and readability for developers.*
 
 **Status**
 
@@ -12,46 +11,25 @@ This SDK is still considered a work in progress, therefore things might (and wil
 
 ## Getting started
 
-For sdk user:
+> Runtime support: Python 3.9+
+
+For SDK user:
 
 ```bash
 pip install mixinsdk
 ```
 
-For sdk dev:
+For SDK dev:
 
-> Runtime support: Python 3.8+
+see [CONTRIBUTING.md](/CONTRIBUTING.md).
 
-1. Clone the repository, or download code.
+changelog to see [CHANGELOG.md](/CHANGELOG.md).
 
-2. Set up and activate virtual environment, like this:
-
-```bash
-cd mixin-sdk-python-main
-python3 -m venv .env
-. .env/bin/activate
-
-# for windows
-# .\.env\Scripts\activate
-```
-
-3. Install dependencies:
-
-`python3 -m pip install -r requirements.txt`
-
-4. Than see "examples" folder, and run it.
 
 ## Relations
 
 Mixin Messenger Bot Boilerplate: [nodewee/mm-bot-boilerplate](https://github.com/nodewee/mm-bot-boilerplate)
 
-## Contributing
-
-We'd love to accept your patches and contributions to this project.
-
-How to contribute, see file [CONTRIBUTING.md](https://github.com/nodewee/mixin-sdk-python/blob/main/CONTRIBUTING.md)
-
-Changelog see file [CHANGELOG.md](https://github.com/nodewee/mixin-sdk-python/blob/main/CHANGELOG.md)
 
 **TODO**
 
@@ -63,13 +41,14 @@ Changelog see file [CHANGELOG.md](https://github.com/nodewee/mixin-sdk-python/bl
 - [ ] Multi-Signature API
 - [ ] Collectibles API
 - [ ] Mainnet RPC API and Client
+- [ ] Support for Mixin Safe
 
 ## References
 
 - <https://developers.mixin.one/docs/api>
 - <https://github.com/MixinNetwork/bot-api-go-client/>
-- <https://github.com/includeleec/mixin-python3-sdk>
-- <https://github.com/learnforpractice/mixin-python>
+- <https://github.com/fox-one/mixin-sdk-go/>
+- <https://github.com/liuzemei/mixin-node-sdk>
 
 ## License
 

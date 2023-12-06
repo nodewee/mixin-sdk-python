@@ -1,28 +1,51 @@
 # How to contribute
 
-We'd love to accept your patches and contributions to this project. There are just a few small guidelines you need to follow.
+We'd love to accept your patches and contributions to this project. There are just a few small guidelines.
 
 ## Guidelines
 
-> Install dependencies for development environment.
-`pip install -r requirements-dev.txt`
+1. Clone this repository or download it.
 
-1. Write your code
+2. Prepare your environment
 
-2. Test your code
+    > Runtime support: Python 3.9+
 
-    (If required) Add a test case for your code in `tests/` folder, and make sure it passes.
+    Set up and activate virtual environment, like this:
 
-    Use `pytest tests` to run all tests automatically.
+    ```bash
+    cd mixin-sdk-python-main
+    python3 -m venv .env
 
-3. Formatting code `isort mixinsdk;black -l 88 -t py39 -t py310 mixinsdk`
+    # for linux or mac
+    . .env/bin/activate
 
-4. Update CHANGELOG.md (If need be)
+    # for windows
+    # .\.env\Scripts\activate
+    ```
 
-5. Bump the version number([semantic versioning](https://semver.org/)), and update the changelog.
+3. Install dependencies:
+
+    `pip install -r requirements.txt`
+
+    Install dependencies for development.
+
+    `pip install -r requirements-dev.txt`
+
+4. Than see "examples" folder, and run to test.
+
+5. Write your code
+
+
+7. Formatting code `isort . && black .`
+
+    Rules are defined in `pyproject.toml`
+
+1. Update CHANGELOG.md (If need be)
+
+2. Bump the version number([semantic versioning](https://semver.org/)), and update the changelog.
 
     Use `bumpversion major|minor|patch`
 
-6. Push your code to the repository.
+3. Push your code to the repository.
 
     Use `git push origin main --tags` to push your code to the repository.
