@@ -20,7 +20,7 @@ pip install mixinsdk
 
 For sdk dev:
 
-> Runtime support: Python 3.9+
+> Runtime support: Python 3.8+
 
 1. Clone the repository, or download code.
 

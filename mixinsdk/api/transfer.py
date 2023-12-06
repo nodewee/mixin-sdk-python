@@ -126,6 +126,7 @@ class TransferApi:
         asset_id: str = None,
         opponent_id: str = None,
         description: str = None,
+        version: str = "origin",  # origin or safe
     ):
         """Get the snapshots by several filters.
 
@@ -156,7 +157,10 @@ class TransferApi:
         if description:
             params["description"] = description
 
-        return self._http.get("/snapshots", params)
+        if version == "origin":
+            return self._http.get("/snapshots", params)
+        if version == "safe":
+            return self._http.get("/safe/snapshots", params)
 
     def get_snapshot(self, snapshot_id: str):
         """Get the snapshot of a user by snapshot id

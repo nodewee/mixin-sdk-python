@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mixinsdk",
-    version="0.2.1",
+    version="0.2.2",
     author="nodewee",
     author_email="nodewee@gmail.com",
     description="python sdk for mixin: https://github.com/nodewee/mixin-sdk-python",
@@ -20,12 +20,12 @@ setuptools.setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     packages=setuptools.find_packages(exclude=["examples"]),
-    python_requires=">=3.9",
+    python_requires=">=3.8",
     install_requires=[
         "requests",
         "pyjwt",
