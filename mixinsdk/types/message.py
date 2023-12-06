@@ -99,23 +99,41 @@ def pack_message(
     message_id: str = None,
     representative_id: str = None,
     quote_message_id: str = None,
+    encrypt_func: callable = None,
 ):
     """
     - conversation_id, *required*
     - category, *required*
     - data, *required*, base64 encoded string of content payload
-    - recipient_id, optional when send single message,
-        *required* when send list of messages
+    - recipient_id, *recommended*,
+        *required* when send encrypted message or list of messages
     - message_id, optional, if not set, will be generated randomly
     """
 
     message_id = message_id if message_id else str(uuid.uuid4())
+
     pld = {
         "conversation_id": conversation_id,
-        "category": data_obj.category,
-        "data": data_obj.b64encoded_data,
         "message_id": message_id,
     }
+
+    if not encrypt_func:
+        pld["category"] = data_obj.category
+        pld["data_base64"] = data_obj.b64encoded_data
+
+    else:  # encrypt message data
+        if not recipient_id:
+            raise ValueError("recipient_id is required for encrypted message")
+        pld["category"] = data_obj.category.replace("PLAIN_", "ENCRYPTED_")
+
+        encrypted_data, recipient_sessions, checksum = encrypt_func(
+            data_obj.b64encoded_data, conversation_id
+        )
+        pld["data"] = ""
+        pld["data_base64"] = encrypted_data
+        pld["recipient_sessions"] = recipient_sessions
+        pld["checksum"] = checksum
+
     if recipient_id:
         pld["recipient_id"] = recipient_id
     if representative_id:
@@ -126,26 +144,17 @@ def pack_message(
     return pld
 
 
-def pack_text_data(text, encrypt_func: callable = None) -> MessageDataObject:
+def pack_text_data(text) -> MessageDataObject:
     payload = text
-    if encrypt_func:
-        data_b64_str = encrypt_func(payload)
-        cat = MESSAGE_CATEGORIES.ENCRYPTED_TEXT
-    else:
-        data_b64_str = base64.b64encode(payload.encode("utf-8")).decode("utf-8")
-        cat = MESSAGE_CATEGORIES.PLAIN_TEXT
-
+    data_b64_str = base64.b64encode(payload.encode("utf-8")).decode("utf-8")
+    cat = MESSAGE_CATEGORIES.PLAIN_TEXT
     return MessageDataObject(payload, data_b64_str, cat)
 
 
-def pack_post_data(markdown_text, encrypt_func: callable = None) -> MessageDataObject:
+def pack_post_data(markdown_text) -> MessageDataObject:
     payload = markdown_text
-    if encrypt_func:
-        data_b64_str = encrypt_func(payload)
-        cat = MESSAGE_CATEGORIES.ENCRYPTED_POST
-    else:
-        data_b64_str = base64.b64encode(payload.encode("utf-8")).decode("utf-8")
-        cat = MESSAGE_CATEGORIES.PLAIN_POST
+    data_b64_str = base64.b64encode(payload.encode("utf-8")).decode("utf-8")
+    cat = MESSAGE_CATEGORIES.PLAIN_POST
 
     return MessageDataObject(payload, data_b64_str, cat)
 

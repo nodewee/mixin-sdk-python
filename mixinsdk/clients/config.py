@@ -11,7 +11,7 @@ class AppConfig:
     """
 
     def __init__(self, pin, client_id, session_id, pin_token, private_key):
-        """You can get bot config value from https://developers.mixin.one/dashboard"""
+        """You can get bot config values from https://developers.mixin.one/dashboard"""
 
         self.pin = pin
         self.client_id = client_id
@@ -25,6 +25,7 @@ class AppConfig:
         else:
             self.key_algorithm = "Ed25519"
             key = base64_pad_equal_sign(self.private_key)
+            # ed25519 private key bytes
             self.private_key = urlsafe_b64decode(key.encode())
 
     @classmethod

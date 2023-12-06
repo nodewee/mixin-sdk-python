@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import gzip
 import json
 import logging
@@ -11,14 +12,12 @@ from concurrent.futures import ThreadPoolExecutor
 
 import websockets
 import websockets.client
-from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from mixinsdk.clients._message import encrypt_message_data
-from mixinsdk.types.user import UserProfile
+from mixinsdk.types.user import UserProfile, UserSession
 
 from ..constants import API_BASE_URLS
 from ..utils import get_conversation_id_of_two_users
-from ._message import parse_message_data
+from . import _message
 from ._sign import sign_authentication_token
 from .config import AppConfig
 
@@ -85,9 +84,6 @@ class BlazeClient:
         """
         - message, use types.message.pack_message() to make it
         """
-
-        # TODO : depends on switch of encryption
-        # message["data"]=
 
         msg = {
             "id": str(uuid.uuid4()),
@@ -211,24 +207,25 @@ class BlazeClient:
                 break  # exit the while loop
 
     def parse_message_data(self, data: str, category: str):
-        return parse_message_data(
+        return _message.parse_message_data(
             data, category, self.config.session_id, self.config.private_key
         )
 
-    def encrypt_message_data(self, data_b64_str: str):
-        pass
-        # # data = base64.b64encode(b"hello world").decode("utf-8")
-        # private = ed25519.Ed25519PrivateKey().from_private_bytes(
-        #     self.config..private_key
-        # )
-        # public = private.public_key()
-        # user_session = UserSession(
-        #     self.config..client_id, self.config..session_id, public
-        # )
-        # data_encrypted = encrypt_message_data(
-        #     data, [user_session], self.config..private_key
-        # )
-        # data_b64_str = base64.b64encode(data_encrypted).decode("utf-8")
+    def encrypt_message_data(self, b64encoded_data: str, conversation_id: str):
+        data_bytes = base64.b64decode(b64encoded_data)
+        user_sessions = self.get_conversation_user_sessions(conversation_id)
+        # print("\n\nGot user_sessions:", user_sessions)
+        encrypted_data = _message.encrypt_message_data(
+            data_bytes, user_sessions, self.config.private_key
+        )
+        recipient_sessions = [
+            {"session_id": session["session_id"]} for session in user_sessions
+        ]
+        # print(recipient_sessions)
+        # exit()
+        checksum = self.generate_session_checksum(recipient_sessions)
+
+        return encrypted_data, recipient_sessions, checksum
 
     def start_to_list_pending_message(self):
         if not self.ws:

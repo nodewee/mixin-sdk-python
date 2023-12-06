@@ -1,3 +1,4 @@
+import time
 from io import FileIO
 from typing import List, Union
 
@@ -16,8 +17,10 @@ class MessageApi:
             A maximum of 100 messages can be sent in batch each time,
             and the message body cannot exceed 128Kb.
         """
-
         return self._http.post("/messages", messages)
+
+    def send_encrypted_messages(self, messages: list):
+        return self._http.post("/encrypted_messages", messages)
 
     def create_attachment(self) -> dict:
         """After creating action, then upload the attachment to upload_url,
