@@ -1,17 +1,31 @@
+# Sysstem
+**/.DS_Store
+**/Thumbs.db_
+
 # Dev
+**/.venv
+**/.svn
+**/.vscode
 .vscode/
 data/
 tmp.*
+**/.pdm.*
+**/tmp.*
+.env.*
+**/*.lock
+.pdm-python
+.pdm-build
 
 # Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
+**/__pycache__/
+**/*.py[cod]
+**//*$py.class
+**/*.pyc
 
 # Distribution / packaging
+**/__pycache__
+**/__pypackages__
+**/.pytest_cache
 .Python
 build/
 develop-eggs/

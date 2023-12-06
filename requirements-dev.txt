@@ -1,6 +1,7 @@
 black
-flake8
 isort
-bumpversion
 pytest
+# 
+bumpversion
 build
+twine

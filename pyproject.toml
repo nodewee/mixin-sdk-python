@@ -2,6 +2,10 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.isort]
+profile = "black"
+src_paths = ["mixinsdk", "examples", "setup.py"]
+
 [tool.black]
 line-length = 88 # default is 88
 target-version = ['py38', 'py39', 'py310']
