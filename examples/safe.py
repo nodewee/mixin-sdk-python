@@ -1,6 +1,7 @@
 import json
 
-from examples._example_vars import APP_CONFIG_FILE, CNB_ASSET_ID
+# todo: update this file
+from examples._example_config import APP_CONFIG_FILE, CNB_ASSET_ID
 from mixinsdk.clients.client_http import HttpClient_WithAppConfig
 from mixinsdk.clients.config import AppConfig
 from mixinsdk.types.messenger_schema import pack_payment_uri
