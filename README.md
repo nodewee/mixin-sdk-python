@@ -33,7 +33,6 @@ Mixin Messenger Bot Boilerplate: [nodewee/mm-bot-boilerplate](https://github.com
 
 **TODO**
 
-- [ ] Support for send encrypted messages?
 - [ ] Address API
 - [ ] Circles API
 - [ ] Upload Album
