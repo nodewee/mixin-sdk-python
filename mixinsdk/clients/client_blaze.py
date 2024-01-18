@@ -1,5 +1,4 @@
 import asyncio
-import base64
 import gzip
 import json
 import logging
@@ -13,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 import websockets
 import websockets.client
 
-from mixinsdk.types.user import UserProfile, UserSession
+from mixinsdk.types.user import UserProfile
 
 from ..constants import API_BASE_URLS
 from ..utils import get_conversation_id_of_two_users
@@ -97,7 +96,7 @@ class BlazeClient:
         run websocket server forever
         """
 
-        # ----- For handle KeyboardInterrupt
+        # for handle KeyboardInterrupt
         def kbdint_handler(sig, frame):
             self.logger.debug(" ⌨ Keyboard Interrupt =====")
             self.close(keyboard_interrupt=True)
@@ -165,7 +164,7 @@ class BlazeClient:
             if error:
                 self._callback(self.on_error, error)
 
-        while True:  # -- Run websocket server forever
+        while True:  # run websocket server forever
             auth_token = self._get_auth_token("GET", "/", "")
             async for websocket in websockets.connect(
                 self.api_base,
@@ -191,15 +190,11 @@ class BlazeClient:
                     self.logger.warn("websockets.ConnectionClosed")
                     time.sleep(2)
                     break  # to recreate websocket connection of new token, else invalid token
-                    # if self._stoping:
-                    #     break
                 except Exception as e:
                     self.logger.error("Exception occurred", exc_info=True)
                     self._callback(self.on_error, e)
                     time.sleep(2)
                     break  # to recreate websocket connection of new token, else invalid token
-                    # if self._stoping:
-                    #     break
             # exited the websocket context, will closed the connection automatically
             self.logger.debug("exited the websocket context")
 
@@ -210,22 +205,6 @@ class BlazeClient:
         return _message.parse_message_data(
             data, category, self.config.session_id, self.config.private_key
         )
-
-    def encrypt_message_data(self, b64encoded_data: str, conversation_id: str):
-        data_bytes = base64.b64decode(b64encoded_data)
-        user_sessions = self.get_conversation_user_sessions(conversation_id)
-        # print("\n\nGot user_sessions:", user_sessions)
-        encrypted_data = _message.encrypt_message_data(
-            data_bytes, user_sessions, self.config.private_key
-        )
-        recipient_sessions = [
-            {"session_id": session["session_id"]} for session in user_sessions
-        ]
-        # print(recipient_sessions)
-        # exit()
-        checksum = self.generate_session_checksum(recipient_sessions)
-
-        return encrypted_data, recipient_sessions, checksum
 
     def start_to_list_pending_message(self):
         if not self.ws:

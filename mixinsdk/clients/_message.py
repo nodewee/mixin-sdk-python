@@ -1,17 +1,13 @@
 import base64
 import json
 import secrets
+import logging
 import uuid
 from typing import List, Union
 
 import nacl.bindings
 import nacl.signing
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import ed25519, x25519
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from nacl.encoding import RawEncoder
-from nacl.signing import SigningKey
 
 from mixinsdk.utils import base64_pad_equal_sign
 
@@ -31,7 +27,6 @@ def parse_message_data(
 
     if category.startswith("ENCRYPTED_"):
         d = decrypt_message_data(data_b64_str, app_session_id, app_private_key)
-        # print("\ndecrypted:", d)
     else:
         d = base64.b64decode(data_b64_str).decode()
 
@@ -40,12 +35,12 @@ def parse_message_data(
     try:
         return json.loads(d)
     except json.JSONDecodeError:
-        print(f"Failed to json decode data_b64_str: {d}")
+        logging.error(f"Failed to json decode data_b64_str: {d}")
 
 
 def decrypt_message_data(data_b64_str: str, app_session_id: str, private: bytes):
-    data_bytes = base64.b64decode(base64_pad_equal_sign(data_b64_str))
-    size = 16 + 48  # session id bytes + shared key bytes size
+    data_bytes = base64.b64decode(base64_pad_equal_sign(data_b64_str))  # not url safe
+    size = 16 + 48  # length of session id bytes + length of encrypted shared key bytes
     total = len(data_bytes)
     # bytes([1]) + session_len + pub_key + session_id + shared_key + nonce + ...data
     if total < 1 + 2 + 32 + 16 + 48 + 12:
@@ -75,7 +70,7 @@ def decrypt_message_data(data_b64_str: str, app_session_id: str, private: bytes)
     if len(key) != 16:
         raise ValueError("Invalid key")
 
-    encrypted_data = data_bytes[prefixSize + 12 : -16]  # ?len(finalize() + .tag) = 16
+    encrypted_data = data_bytes[prefixSize + 12 : -16]  # remove nonce and tag
 
     nonce = data_bytes[prefixSize : prefixSize + 12]
     decryptor = Cipher(algorithms.AES(key), modes.GCM(nonce)).decryptor()
@@ -84,18 +79,18 @@ def decrypt_message_data(data_b64_str: str, app_session_id: str, private: bytes)
 
 
 def encrypt_message_data(
-    data_bytes: bytes, user_sessions: List[dict], app_private_key: bytes
+    data_bytes: bytes, recipient_sessions: List[dict], app_private_key: bytes
 ):
     """
     session struct: {user_id:uuid str, session_id:uuid str, public_key:str}
     """
 
-    key = secrets.token_bytes(16)
+    shared_key = secrets.token_bytes(16)
     nonce = secrets.token_bytes(12)
 
-    encryptor = Cipher(algorithms.AES(key), modes.GCM(nonce)).encryptor()
-    main_ciphertext = encryptor.update(data_bytes)
-    main_ciphertext += encryptor.finalize() + encryptor.tag
+    encryptor = Cipher(algorithms.AES(shared_key), modes.GCM(nonce)).encryptor()
+    shared_ciphertext = encryptor.update(data_bytes)
+    shared_ciphertext += encryptor.finalize() + encryptor.tag  # tag = +16 bytes
 
     # ed25519 private key -> cureve25519 public key
     _pk = nacl.bindings.crypto_sign_ed25519_sk_to_pk(app_private_key)
@@ -106,23 +101,23 @@ def encrypt_message_data(
         app_private_key
     )
 
-    session_len = len(user_sessions).to_bytes(2, byteorder="little")
-    sessions_bytes = b""
-
-    padding = 16 - len(key) % 16
+    padding = 16 - len(shared_key) % 16  # = 16
     pad_text = bytes([padding] * padding)
-    shared = key + pad_text
+    shared_key += pad_text  # length = 32
 
-    for s in user_sessions:
+    sessions_bytes = b""
+    for s in recipient_sessions:
         client_pub = base64.urlsafe_b64decode(base64_pad_equal_sign(s["public_key"]))
-        dst = nacl.bindings.crypto_scalarmult(curve25519_privkey, client_pub)
+        p2p_key = nacl.bindings.crypto_scalarmult(curve25519_privkey, client_pub)
 
         iv = secrets.token_bytes(16)
-        encryptor = Cipher(algorithms.AES(dst), modes.CBC(iv)).encryptor()
-        ciphertext = iv + encryptor.update(shared)  # do not: + encryptor.finalize()
+        encryptor = Cipher(algorithms.AES(p2p_key), modes.CBC(iv)).encryptor()
+        encrypted_shared_key = iv + encryptor.update(shared_key)
+        encrypted_shared_key += encryptor.finalize()  # length = 48
 
-        id = uuid.UUID(s["session_id"]).bytes
-        sessions_bytes += id + ciphertext
+        id_ = uuid.UUID(s["session_id"]).bytes
+        sessions_bytes += id_ + encrypted_shared_key
+    session_len = len(recipient_sessions).to_bytes(2, byteorder="little")
 
     result = (
         bytes([1])
@@ -130,9 +125,9 @@ def encrypt_message_data(
         + curve25519_pubkey
         + sessions_bytes
         + nonce
-        + main_ciphertext
+        + shared_ciphertext
     )
-    encoded = base64.urlsafe_b64encode(result).decode("utf-8")
+    encoded = base64.urlsafe_b64encode(result).decode("utf-8")  # must be url safe
     encoded = encoded.rstrip("=")  # remove padding
 
     return encoded

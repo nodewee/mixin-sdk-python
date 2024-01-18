@@ -4,8 +4,7 @@ import uuid
 
 
 def base64_pad_equal_sign(s: str):
-    if not len(s) % 4 == 0:
-        s = s + "===="
+    s = s.rstrip("=") + "=" * (len(s) % 4)
     return s
 
 

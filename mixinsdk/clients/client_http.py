@@ -74,15 +74,17 @@ class HttpClient_WithAppConfig:
     def encrypt_message_data(self, b64encoded_data: str, conversation_id: str):
         data_bytes = base64.b64decode(b64encoded_data)
         user_sessions = self.get_conversation_user_sessions(conversation_id)
-        # print("\n\nGot user_sessions:", user_sessions)
+
+        recipient_sessions = []
+        for s in user_sessions:
+            # drop self session
+            if s["session_id"] == self.config.session_id:
+                continue
+            recipient_sessions.append(s)
+
         encrypted_data = _message.encrypt_message_data(
-            data_bytes, user_sessions, self.config.private_key
+            data_bytes, recipient_sessions, self.config.private_key
         )
-        recipient_sessions = [
-            {"session_id": session["session_id"]} for session in user_sessions
-        ]
-        # print(recipient_sessions)
-        # exit()
         checksum = self.generate_session_checksum(recipient_sessions)
 
         return encrypted_data, recipient_sessions, checksum
@@ -99,11 +101,6 @@ class HttpClient_WithAppConfig:
         """
         - conversation_id: str
         """
-        conv = self.api.conversation.read(conversation_id)
-        # print("\n\nconversation:", conv)
-        sessions = conv["data"]["participant_sessions"]
-        return sessions
-        #
         if conversation_id in self._conversation_user_sessions:
             d = self._conversation_user_sessions[conversation_id]
             if d["expire_at"] > time.time():
@@ -115,6 +112,7 @@ class HttpClient_WithAppConfig:
             sessions = self.api.conversation.read(conversation_id)["data"][
                 "participant_sessions"
             ]
+
             # cache
             expire_at = time.time() + 3600  # every hour to read from api again
             d = {
