@@ -60,22 +60,25 @@ def message_handle(bot: BlazeClient, message):
             quote_message_id=msg_data.get("message_id"),
         )
     )
+
+    # encrypted text message (use http client)
+    reply_text = "follow an encrypted message"
+    msg = pack_message(
+        pack_text_data(reply_text),
+        conversation_id=msg_data.get("conversation_id"),
+        recipient_id=msg_data.get("user_id"),
+        encrypt_func=bot.xin.encrypt_message_data,
+        quote_message_id=msg_data.get("message_id"),
+    )
+    client.api.message.send_encrypted_messages([msg])
+
     bot.echo(msg_data.get("message_id"))
 
-    # encrypted text message
-    reply_text = "This is a encrypted message"
-    bot.xin.api.send_messages(
-        pack_message(
-            pack_text_data(reply_text, encrypt_func=bot.encrypt_message_data),
-            conversation_id=msg_data.get("conversation_id"),
-            quote_message_id=msg_data.get("message_id"),
-        )
-    )
     return
 
 
 TEST_PARAMS = load_parameters()
-cfg = AppConfig.from_payload(load_app_keystore())
+cfg = AppConfig.from_payload(load_app_keystore("mixin-app-keystore.json"))
 client = HttpClient_WithAppConfig(cfg)
 bot = BlazeClient(
     cfg,

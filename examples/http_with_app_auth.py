@@ -1,4 +1,5 @@
 import datetime
+from pprint import pprint
 
 from mixinsdk.clients.client_http import HttpClient_WithAppConfig
 from mixinsdk.clients.config import AppConfig
@@ -19,6 +20,7 @@ from ._test_utils import load_app_keystore, load_parameters
 TEST_PARAMS = load_parameters()
 cfg = AppConfig.from_payload(load_app_keystore())
 client = HttpClient_WithAppConfig(cfg)
+
 
 # === user api ===
 
@@ -123,7 +125,7 @@ def test_send_text_message_to_user():
     msg_data = pack_text_data("Hello!")
     msg = pack_message(msg_data, client.get_conversation_id_with_user(user_id))
     r = client.api.send_messages(msg)
-    print(r)
+    pprint(r)
     assert r["data"] is not None
 
 
@@ -134,7 +136,7 @@ def test_send_text_message_to_group():
         group_id,
     )
     r = client.api.send_messages(msg)
-    print(r)
+    pprint(r)
     assert r["data"] is not None
 
 
@@ -150,7 +152,7 @@ def test_send_encrypted_message():
     )
     msgs = [msg]
     r = client.api.message.send_encrypted_messages(msgs)
-    print(r)
+    pprint(r)
     assert r["data"] is not None
 
 
