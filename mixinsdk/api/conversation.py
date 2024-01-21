@@ -65,7 +65,7 @@ class ConversationApi:
     def create_single(self, bot_id, user_id):
         """Create conversation between bot and user"""
         conv_id = get_conversation_id_of_two_users(bot_id, user_id)
-        return self.create("CONTACT", conv_id)
+        return self.create("CONTACT", conv_id, participants = [{"user_id": user_id}])
 
     def create_group(self, list_of_user_id: list, group_name: str = None):
         """
